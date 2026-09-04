@@ -2,7 +2,7 @@
 
 This document defines the backend API required by the Nexus FMS Dashboard page.
 
-The Dashboard and Analytics pages are intentionally separate:
+The Dashboard and Analytics pages are intentionally separate. The implemented API paths are under `/api/v1`:
 
 - `/dashboard` provides real-time operational information for today.
 - `/analytics` provides historical revenue, booking, and performance reporting.
@@ -12,7 +12,7 @@ Dashboard data should not duplicate Analytics summary cards such as total revenu
 ## Recommended endpoint
 
 ```http
-GET /dashboard
+GET /api/v1/dashboard/
 ```
 
 ### Query parameters
@@ -26,7 +26,7 @@ GET /dashboard
 Example:
 
 ```http
-GET /dashboard?date=2026-09-05&timezone=Asia%2FKathmandu
+GET /api/v1/dashboard/?date=2026-09-05&timezone=Asia%2FKathmandu
 ```
 
 ## Expected response
@@ -186,30 +186,9 @@ This section provides useful operational context without duplicating Analytics.
 
 If a value is unavailable, return `null` instead of an empty string.
 
-## Optional supporting endpoints
+## Endpoint availability
 
-The recommended implementation is one aggregated endpoint:
-
-```http
-GET /dashboard
-```
-
-If the backend prefers smaller resources, these endpoints can be provided:
-
-```http
-GET /dashboard/summary
-GET /dashboard/slot-availability
-GET /dashboard/todays-schedule
-GET /dashboard/facility-snapshot
-```
-
-All endpoints should accept:
-
-```text
-date
-futsal
-timezone
-```
+Only the aggregate dashboard endpoint is provided. It accepts the `date`, `futsal`, and `timezone` filters described above.
 
 ## Error response
 
@@ -269,7 +248,7 @@ Use the booking amount for bookings created for the selected date. The backend s
 - Return slots and bookings in stable chronological order.
 - Return `null` for unavailable optional values.
 - Cache or efficiently query the selected date because this endpoint powers the first dashboard screen.
-- Do not use frontend dummy values after backend integration; map the UI to the `/dashboard` response.
+- Do not use frontend dummy values after backend integration; map the UI to the `/api/v1/dashboard/` response.
 
 ## Frontend integration mapping
 

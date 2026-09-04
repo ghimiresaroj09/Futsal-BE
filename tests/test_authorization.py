@@ -8,7 +8,7 @@ ADMIN_URLS = [
     "/api/v1/admin/reminders/",
     "/api/v1/admin/slots/",
     "/api/v1/admin/bookings/",
-    "/api/v1/admin/dashboard/",
+    "/api/v1/dashboard/",
     "/api/v1/analytics/",
     "/api/v1/admin/contact/",
     "/api/v1/admin/users/",

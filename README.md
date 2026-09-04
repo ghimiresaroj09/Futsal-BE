@@ -22,7 +22,7 @@ mandatory concurrency test proving double booking is impossible).
 | Reschedule | Fully atomic slot swap with rollback; old slot released, new slot booked |
 | Cancellation | Releases the slot and refunds the payment record |
 | Revenue | Amount snapshotted at booking time, daily/weekly/monthly aggregation, date filtering |
-| Dashboard | Today's overview, occupancy rate, graph-ready revenue & booking series |
+| Dashboard | Today's operational stats, slot availability, and booking schedule |
 | Reminders | Celery Beat sends a 1-hour-before email; duplicates blocked at DB level; manual admin trigger |
 | Contact | Public submission + admin triage workflow |
 | Cross-cutting | Standard response envelope, centralised error handling, pagination, filtering, search, whitelisted ordering, throttling, structured logging |
@@ -45,7 +45,7 @@ futsal_backend/
 ├── bookings/              # Booking model, state machine, services, user/admin APIs
 ├── payments/              # Payment model + revenue selectors
 ├── notifications/         # Reminder model, email service, Celery tasks
-├── dashboard/             # Analytics selectors + admin dashboard/revenue views
+├── dashboard/             # Analytics and operational dashboard endpoints
 ├── contact/               # ContactMessage
 ├── templates/emails/      # HTML email templates
 └── tests/                 # pytest suite
@@ -280,8 +280,8 @@ PATCH     /api/v1/admin/bookings/{id}/reschedule/
 # analytics
 GET       /api/v1/analytics/
 
-# admin-dashboard
-GET       /api/v1/admin/dashboard/  /dashboard/revenue/  /dashboard/bookings/  /dashboard/slots/
+# dashboard
+GET       /api/v1/dashboard/
 
 # admin-contact
 GET|PATCH /api/v1/admin/contact/[{id}/]
@@ -310,7 +310,7 @@ its own Swagger tag, so the docs read as separate sections rather than one flat 
 | `admin-slots` | `/admin/slots/` | Slot CRUD, bulk generation, whole-day closures |
 | `admin-bookings` | `/admin/bookings/` | Bookings: create, update, cancel, reschedule, complete |
 | `analytics` | `/analytics/` | Aggregate dashboard analytics and revenue reporting |
-| `admin-dashboard` | `/admin/dashboard/` | Today's stats, occupancy, graph data |
+| `dashboard` | `/dashboard/` | Today's operational stats, slots, and schedule |
 | `admin-contact` | `/admin/contact/` | Contact message triage |
 | `admin-reminders` | `/admin/reminders/` | Reminder history + manual send |
 
@@ -530,7 +530,7 @@ tests/test_bookings.py       booking, conflicts, snapshots, history, cancel, com
 tests/test_reschedule.py     success, unavailable/past slot, ownership, atomic rollback
 tests/test_concurrency.py    MANDATORY threaded double-booking test + DB constraint test
 tests/test_revenue.py        daily/weekly/monthly, filters, refunds, historical pricing
-tests/test_dashboard.py      today's stats, occupancy (incl. divide-by-zero), graph data
+tests/test_dashboard.py      operational dashboard response, date filtering, access control
 tests/test_reminders.py      1-hour calculation, duplicate prevention, manual, failures
 tests/test_contact.py        create, validation, admin retrieval and status update
 tests/test_api_contract.py   envelopes, docs/schema, no stack-trace leakage, ordering, paging
