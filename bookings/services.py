@@ -22,6 +22,9 @@ from futsal.models import FutsalClosure, Slot
 from notifications.emails import (
     send_booking_cancellation_email, send_booking_confirmation_email, send_reschedule_email,
 )
+from notifications.services import (
+    create_admin_booking_cancellation_notifications, create_admin_booking_notifications,
+)
 from payments.models import Payment
 from payments.services import create_payment_for_booking, refund_payment
 
@@ -114,6 +117,8 @@ def create_booking(
     )
     logger.info("Booking created reference=%s slot=%s source=%s",
                 booking.booking_reference, slot.pk, source)
+    if source == BookingSource.USER:
+        create_admin_booking_notifications(booking=booking)
     transaction.on_commit(lambda: _safe_email(send_booking_confirmation_email, booking))
     return booking
 
@@ -145,6 +150,9 @@ def cancel_booking(*, booking: Booking, actor=None, reason: str = "") -> Booking
         refund_payment(payment)
     logger.info("Booking cancelled reference=%s actor=%s", booking.booking_reference,
                 getattr(actor, "id", None))
+    # A cancellation is always operationally relevant to admins, regardless of
+    # whether it was initiated by the customer or an admin.
+    create_admin_booking_cancellation_notifications(booking=booking)
     transaction.on_commit(lambda: _safe_email(send_booking_cancellation_email, booking, reason))
     return booking
 

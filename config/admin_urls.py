@@ -7,7 +7,6 @@ Swagger tag:
     /api/v1/admin/futsal/     → admin-futsal
     /api/v1/admin/slots/      → admin-slots
     /api/v1/admin/bookings/   → admin-bookings
-    /api/v1/admin/revenue/    → admin-revenue
     /api/v1/admin/dashboard/  → admin-dashboard
     /api/v1/admin/contact/    → admin-contact
     /api/v1/admin/reminders/  → admin-reminders
@@ -20,7 +19,7 @@ from bookings.views import AdminBookingViewSet
 from contact.views import AdminContactViewSet
 from dashboard import views as dashboard_views
 from futsal.views import AdminFutsalMediaViewSet, AdminFutsalView, AdminSlotViewSet
-from notifications.views import AdminReminderViewSet
+from notifications.views import AdminNotificationViewSet, AdminReminderViewSet
 
 # --- profile -----------------------------------------------------------------
 profile_urls = [
@@ -53,20 +52,14 @@ contact_router.register("contact", AdminContactViewSet, basename="admin-contact"
 reminder_router = DefaultRouter()
 reminder_router.register("reminders", AdminReminderViewSet, basename="admin-reminder")
 
+# --- in-app notifications ---------------------------------------------------
+notification_router = DefaultRouter()
+notification_router.register("notifications", AdminNotificationViewSet,
+                             basename="admin-notification")
+
 # --- users ------------------------------------------------------------------
 user_router = DefaultRouter()
 user_router.register("users", AdminUserViewSet, basename="admin-user")
-
-# --- revenue -----------------------------------------------------------------
-revenue_urls = [
-    path("revenue/", dashboard_views.RevenueView.as_view(), name="admin-revenue"),
-    path("revenue/daily/", dashboard_views.DailyRevenueView.as_view(),
-         name="admin-revenue-daily"),
-    path("revenue/weekly/", dashboard_views.WeeklyRevenueView.as_view(),
-         name="admin-revenue-weekly"),
-    path("revenue/monthly/", dashboard_views.MonthlyRevenueView.as_view(),
-         name="admin-revenue-monthly"),
-]
 
 # --- dashboard ---------------------------------------------------------------
 dashboard_urls = [
@@ -82,12 +75,12 @@ dashboard_urls = [
 urlpatterns = [
     *profile_urls,
     *futsal_urls,
-    *revenue_urls,
     *dashboard_urls,
     path("", include(media_router.urls)),
     path("", include(slot_router.urls)),
     path("", include(booking_router.urls)),
     path("", include(contact_router.urls)),
     path("", include(reminder_router.urls)),
+    path("", include(notification_router.urls)),
     path("", include(user_router.urls)),
 ]

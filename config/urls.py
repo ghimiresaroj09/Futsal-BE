@@ -13,6 +13,7 @@ from bookings.views import BookingViewSet
 from contact.views import ContactCreateViewSet
 from common.cron_views import CronReminderView
 from common.health_views import HealthView
+from dashboard.views import AnalyticsView
 from futsal.views import FutsalDetailView, PublicFutsalMediaViewSet, PublicSlotViewSet
 
 router = DefaultRouter()
@@ -25,6 +26,7 @@ api_v1 = [
     path("auth/", include((auth_urlpatterns, "auth"))),
     path("users/", include((user_urlpatterns, "users"))),
     path("futsal/", FutsalDetailView.as_view(), name="futsal"),
+    path("analytics/", AnalyticsView.as_view(), name="analytics"),
     path("admin/", include("config.admin_urls")),
     path("internal/cron/reminders/", CronReminderView.as_view(), name="cron-reminders"),
     path("", include(router.urls)),

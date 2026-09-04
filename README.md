@@ -277,8 +277,8 @@ POST      /api/v1/admin/bookings/{id}/complete/
 POST      /api/v1/admin/bookings/{id}/cancel/
 PATCH     /api/v1/admin/bookings/{id}/reschedule/
 
-# admin-revenue
-GET       /api/v1/admin/revenue/[daily|weekly|monthly]/
+# analytics
+GET       /api/v1/analytics/
 
 # admin-dashboard
 GET       /api/v1/admin/dashboard/  /dashboard/revenue/  /dashboard/bookings/  /dashboard/slots/
@@ -289,11 +289,18 @@ GET|PATCH /api/v1/admin/contact/[{id}/]
 # admin-reminders
 GET       /api/v1/admin/reminders/[{id}/]
 POST      /api/v1/admin/bookings/{id}/send-reminder/
+GET       /api/v1/admin/bookings/{id}/reminders/
+
+# admin-notifications
+GET       /api/v1/admin/notifications/[{id}/]?read=read|unread
+POST      /api/v1/admin/notifications/{id}/mark-read/
+POST      /api/v1/admin/notifications/{id}/mark-unread/
+POST      /api/v1/admin/notifications/mark-all-read/
 ```
 
 ### Admin API grouping
 
-The admin surface is split into eight independent groups, each with its own URL prefix and
+The admin surface is split into nine independent groups, each with its own URL prefix and
 its own Swagger tag, so the docs read as separate sections rather than one flat list:
 
 | Tag | Prefix | Purpose |
@@ -302,7 +309,7 @@ its own Swagger tag, so the docs read as separate sections rather than one flat 
 | `admin-futsal` | `/admin/futsal/` | Venue configuration: pricing, opening hours |
 | `admin-slots` | `/admin/slots/` | Slot CRUD, bulk generation, whole-day closures |
 | `admin-bookings` | `/admin/bookings/` | Bookings: create, update, cancel, reschedule, complete |
-| `admin-revenue` | `/admin/revenue/` | Revenue totals and period breakdowns |
+| `analytics` | `/analytics/` | Aggregate dashboard analytics and revenue reporting |
 | `admin-dashboard` | `/admin/dashboard/` | Today's stats, occupancy, graph data |
 | `admin-contact` | `/admin/contact/` | Contact message triage |
 | `admin-reminders` | `/admin/reminders/` | Reminder history + manual send |
