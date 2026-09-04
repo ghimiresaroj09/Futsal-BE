@@ -5,7 +5,27 @@ from .base import config, Csv
 DEBUG = False
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=Csv())
 
-SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS", default="https://*.onrender.com", cast=Csv()
+)
+
+MIDDLEWARE = [
+    middleware for middleware in MIDDLEWARE  # noqa: F405
+    if middleware != "whitenoise.middleware.WhiteNoiseMiddleware"
+]
+MIDDLEWARE.insert(
+    MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+)
+STORAGES = {
+    **STORAGES,  # noqa: F405
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    },
+}
+
+# Render terminates TLS and redirects before requests reach Django.
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=False, cast=bool)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
