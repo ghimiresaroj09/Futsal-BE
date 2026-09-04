@@ -7,7 +7,6 @@ Swagger tag:
     /api/v1/admin/futsal/     → admin-futsal
     /api/v1/admin/slots/      → admin-slots
     /api/v1/admin/bookings/   → admin-bookings
-    /api/v1/admin/dashboard/  → admin-dashboard
     /api/v1/admin/contact/    → admin-contact
     /api/v1/admin/reminders/  → admin-reminders
 """
@@ -17,7 +16,6 @@ from rest_framework.routers import DefaultRouter
 from accounts.views import AdminChangePasswordView, AdminProfileView, AdminUserViewSet
 from bookings.views import AdminBookingViewSet
 from contact.views import AdminContactViewSet
-from dashboard import views as dashboard_views
 from futsal.views import AdminFutsalMediaViewSet, AdminFutsalView, AdminSlotViewSet
 from notifications.views import AdminNotificationViewSet, AdminReminderViewSet
 
@@ -61,21 +59,9 @@ notification_router.register("notifications", AdminNotificationViewSet,
 user_router = DefaultRouter()
 user_router.register("users", AdminUserViewSet, basename="admin-user")
 
-# --- dashboard ---------------------------------------------------------------
-dashboard_urls = [
-    path("dashboard/", dashboard_views.DashboardView.as_view(), name="admin-dashboard"),
-    path("dashboard/revenue/", dashboard_views.DashboardRevenueView.as_view(),
-         name="admin-dashboard-revenue"),
-    path("dashboard/bookings/", dashboard_views.DashboardBookingsView.as_view(),
-         name="admin-dashboard-bookings"),
-    path("dashboard/slots/", dashboard_views.DashboardSlotsView.as_view(),
-         name="admin-dashboard-slots"),
-]
-
 urlpatterns = [
     *profile_urls,
     *futsal_urls,
-    *dashboard_urls,
     path("", include(media_router.urls)),
     path("", include(slot_router.urls)),
     path("", include(booking_router.urls)),

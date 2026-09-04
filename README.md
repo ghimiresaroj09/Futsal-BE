@@ -45,7 +45,7 @@ futsal_backend/
 ├── bookings/              # Booking model, state machine, services, user/admin APIs
 ├── payments/              # Payment model + revenue selectors
 ├── notifications/         # Reminder model, email service, Celery tasks
-├── dashboard/             # Analytics selectors + admin dashboard/revenue views
+├── dashboard/             # Analytics and operational dashboard endpoints
 ├── contact/               # ContactMessage
 ├── templates/emails/      # HTML email templates
 └── tests/                 # pytest suite
@@ -280,8 +280,8 @@ PATCH     /api/v1/admin/bookings/{id}/reschedule/
 # analytics
 GET       /api/v1/analytics/
 
-# admin-dashboard
-GET       /api/v1/admin/dashboard/  /dashboard/revenue/  /dashboard/bookings/  /dashboard/slots/
+# dashboard
+GET       /api/v1/dashboard/
 
 # admin-contact
 GET|PATCH /api/v1/admin/contact/[{id}/]
@@ -310,7 +310,7 @@ its own Swagger tag, so the docs read as separate sections rather than one flat 
 | `admin-slots` | `/admin/slots/` | Slot CRUD, bulk generation, whole-day closures |
 | `admin-bookings` | `/admin/bookings/` | Bookings: create, update, cancel, reschedule, complete |
 | `analytics` | `/analytics/` | Aggregate dashboard analytics and revenue reporting |
-| `admin-dashboard` | `/admin/dashboard/` | Today's stats, occupancy, graph data |
+| `dashboard` | `/dashboard/` | Today's operational stats, slots, and schedule |
 | `admin-contact` | `/admin/contact/` | Contact message triage |
 | `admin-reminders` | `/admin/reminders/` | Reminder history + manual send |
 

@@ -11,10 +11,72 @@ from django.utils import timezone
 from bookings.models import Booking
 from common.enums import BookingSource, BookingStatus, PaymentStatus, SlotStatus
 from common.utils import local_today
-from futsal.models import Slot
+from futsal.models import FutsalClosure, Slot
 from payments.models import Payment
 
 ZERO = Decimal("0.00")
+
+
+def operational_dashboard(date: dt.date, *, futsal, now: dt.datetime) -> dict:
+    """Return the current operating-day dashboard for one facility."""
+    slots = Slot.objects.filter(futsal=futsal, date=date).order_by("start_time")
+    bookings = (Booking.objects.filter(futsal=futsal, slot__date=date)
+                .select_related("slot", "payment"))
+    active_bookings = bookings.exclude(status=BookingStatus.CANCELLED)
+    paid_payments = Payment.objects.filter(
+        booking__futsal=futsal,
+        booking__slot__date=date,
+        payment_status=PaymentStatus.PAID,
+    )
+    total_slots = slots.count()
+    booked_slots = slots.filter(status=SlotStatus.BOOKED).count()
+    upcoming = active_bookings.filter(slot__start_time__gt=now.timetz().replace(tzinfo=None)) if date == now.date() else active_bookings
+    next_available = (Slot.objects.filter(futsal=futsal, status=SlotStatus.AVAILABLE)
+                      .filter(Q(date__gt=now.date()) | Q(date=now.date(), start_time__gt=now.timetz().replace(tzinfo=None)))
+                      .order_by("date", "start_time").first())
+    peak = (Booking.objects.filter(futsal=futsal).exclude(status=BookingStatus.CANCELLED)
+            .values("slot__start_time", "slot__end_time").annotate(count=Count("id"))
+            .order_by("-count", "slot__start_time").first())
+    closure = FutsalClosure.objects.filter(futsal=futsal, date__gte=date).order_by("date").first()
+    return {
+        "date": date,
+        "facility": {
+            "id": futsal.id,
+            "name": futsal.name,
+            "opening_time": futsal.opening_time,
+            "closing_time": futsal.closing_time,
+        },
+        "operational_stats": {
+            "todays_bookings": bookings.count(),
+            "upcoming_bookings": upcoming.count(),
+            "available_slots": slots.filter(status=SlotStatus.AVAILABLE).count(),
+            "total_slots": total_slots,
+            "occupancy_percent": round(booked_slots / total_slots * 100, 1) if total_slots else 0,
+            "todays_revenue": paid_payments.aggregate(total=Coalesce(Sum("amount"), ZERO))["total"],
+        },
+        "slot_availability": [
+            {"slot_id": slot.id, "date": slot.date, "start_time": slot.start_time,
+             "end_time": slot.end_time, "status": slot.status, "price": slot.effective_price}
+            for slot in slots.select_related("futsal")
+        ],
+        "todays_schedule": [
+            {"booking_id": booking.id, "booking_reference": booking.booking_reference,
+             "start_time": booking.slot.start_time, "end_time": booking.slot.end_time,
+             "full_name": booking.full_name, "futsal_name": futsal.name,
+             "status": booking.status,
+             "payment_status": getattr(booking.payment, "payment_status", None)}
+            for booking in upcoming.order_by("slot__start_time")
+        ],
+        "facility_snapshot": {
+            "next_closed_date": closure.date if closure else None,
+            "next_available_slot": ({"date": next_available.date, "start_time": next_available.start_time,
+                                     "end_time": next_available.end_time} if next_available else None),
+            "peak_booking_window": ({"start_time": peak["slot__start_time"],
+                                    "end_time": peak["slot__end_time"]} if peak else None),
+            "most_used_slot_duration": futsal.slot_duration,
+        },
+        "generated_at": timezone.now(),
+    }
 
 
 def analytics(start: dt.date, end: dt.date, *, period: str, futsal_id=None) -> dict:
