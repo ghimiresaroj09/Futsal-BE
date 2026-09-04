@@ -95,6 +95,16 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
+When Django opens a successful database connection, it writes a confirmation to
+the process logs, for example:
+
+```text
+Database connection established: alias=default backend=postgresql database=futsal
+```
+
+This is emitted when the connection is first used (such as during migrations or
+the first database-backed request), because Django opens database connections lazily.
+
 ### Seed development data
 
 ```bash
@@ -137,6 +147,26 @@ overrides them),
 `EMAIL_*`, `REDIS_URL`, `CELERY_*`, `JWT_ACCESS_TOKEN_LIFETIME` (minutes),
 `JWT_REFRESH_TOKEN_LIFETIME` (days), `CORS_ALLOWED_ORIGINS`, OTP/reminder tuning and
 throttle rates. **Never commit `.env`.**
+
+### MongoDB production log storage (optional)
+
+PostgreSQL remains the application's primary database. MongoDB is optional and
+is used only as a structured log store. Set these values in the production
+environment to activate it:
+
+```env
+MONGODB_LOG_URI=mongodb+srv://<user>:<password>@<cluster>/?retryWrites=true&w=majority
+MONGODB_LOG_DATABASE=futsal_logs
+MONGODB_LOG_COLLECTION=application_logs
+MONGODB_LOG_LEVEL=INFO
+LOG_ENVIRONMENT=production
+```
+
+Each record includes a UTC timestamp, severity, logger, message, source
+location, host, environment, and exception details when present. The log handler
+is fail-safe: if MongoDB cannot be reached, API requests continue and logs still
+go to standard output. Leave `MONGODB_LOG_URI` blank to disable this integration
+(the default for local development).
 
 ### Email / SMTP setup
 
