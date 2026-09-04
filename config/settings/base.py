@@ -135,6 +135,8 @@ CLOUDINARY_STORAGE = {
     "MAGIC_FILE_PATH": "magic",
     "INVALID_VIDEO_ERROR_MESSAGE": "Please upload a valid video file.",
 }
+# Shared secret for the HTTP cron endpoint. Empty means it rejects every request.
+CRON_SECRET = config("CRON_SECRET", default="")
 MAX_IMAGE_UPLOAD_MB = config("MAX_IMAGE_UPLOAD_MB", default=5, cast=int)
 MAX_VIDEO_UPLOAD_MB = config("MAX_VIDEO_UPLOAD_MB", default=100, cast=int)
 STORAGES = {
@@ -225,6 +227,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "admin-contact", "description": "Contact message triage"},
         {"name": "admin-reminders", "description": "Reminder history and manual sending"},
         {"name": "admin-media", "description": "Futsal image/video uploads (Cloudinary)"},
+        {"name": "internal", "description": "Internal cron/scheduler endpoints"},
     ],
 }
 

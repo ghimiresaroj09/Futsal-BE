@@ -6,12 +6,13 @@ from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView,
 )
-from drf_spectacular.renderers import OpenApiJsonRenderer
 from rest_framework.routers import DefaultRouter
 
 from accounts.urls import auth_urlpatterns, user_urlpatterns
 from bookings.views import BookingViewSet
 from contact.views import ContactCreateViewSet
+from common.cron_views import CronReminderView
+from common.health_views import HealthView
 from futsal.views import FutsalDetailView, PublicFutsalMediaViewSet, PublicSlotViewSet
 
 router = DefaultRouter()
@@ -25,17 +26,15 @@ api_v1 = [
     path("users/", include((user_urlpatterns, "users"))),
     path("futsal/", FutsalDetailView.as_view(), name="futsal"),
     path("admin/", include("config.admin_urls")),
+    path("internal/cron/reminders/", CronReminderView.as_view(), name="cron-reminders"),
     path("", include(router.urls)),
 ]
 
 urlpatterns = [
+    path("healthz/", HealthView.as_view(), name="health"),
     path("django-admin/", admin.site.urls),
     path("api/v1/", include((api_v1, "v1"))),
-    path(
-        "api/schema/",
-        SpectacularAPIView.as_view(renderer_classes=[OpenApiJsonRenderer]),
-        name="schema",
-    ),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
