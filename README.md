@@ -277,6 +277,10 @@ POST      /api/v1/admin/bookings/{id}/complete/
 POST      /api/v1/admin/bookings/{id}/cancel/
 PATCH     /api/v1/admin/bookings/{id}/reschedule/
 
+# admin-users
+GET       /api/v1/admin/users/
+GET       /api/v1/admin/users/{id}/booking-history/
+
 # analytics
 GET       /api/v1/analytics/
 

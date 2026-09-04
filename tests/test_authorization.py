@@ -40,6 +40,32 @@ def test_admin_user_list_excludes_admins(admin_client, user, other_user, admin_u
     assert admin_user.email not in emails
 
 
+def test_admin_can_view_a_users_booking_history(admin_client, user, other_user, booking, second_slot):
+    from bookings.services import create_booking
+
+    other_booking = create_booking(
+        slot_id=second_slot.id,
+        full_name="Other User",
+        email=other_user.email,
+        phone_number=other_user.phone_number,
+        user=other_user,
+    )
+
+    response = admin_client.get(f"/api/v1/admin/users/{user.id}/booking-history/?status=CONFIRMED")
+
+    assert response.status_code == 200
+    history = response.data["data"]
+    assert history["count"] == 1
+    assert history["results"][0]["id"] == str(booking.id)
+    assert str(other_booking.id) not in {item["id"] for item in history["results"]}
+
+
+def test_booking_history_is_not_available_for_admin_accounts(admin_client, admin_user):
+    response = admin_client.get(f"/api/v1/admin/users/{admin_user.id}/booking-history/")
+
+    assert response.status_code == 404
+
+
 def test_user_cannot_access_other_users_booking(api, other_user, booking):
     from accounts.services import issue_tokens
 
