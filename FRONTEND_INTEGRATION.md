@@ -49,7 +49,7 @@ Suggested route structure:
    ├─ /admin/closures
    ├─ /admin/bookings
    ├─ /admin/users
-   ├─ /admin/revenue
+   ├─ /analytics
    ├─ /admin/reminders
    ├─ /admin/contact
    └─ /admin/profile
@@ -443,8 +443,9 @@ confirms that role, but rely on the API's `403` check as well.
 | Closures | `GET /admin/slots/closures/`, block/unblock actions |
 | Bookings | `GET/POST /admin/bookings/`, details and actions |
 | Customers | `GET /admin/users/` |
-| Revenue | `GET /admin/revenue/`, daily/weekly/monthly views |
+| Analytics | `GET /analytics/`, aggregate dashboard reporting |
 | Reminders | `GET /admin/reminders/`, booking reminder action |
+| Notifications | `GET /admin/notifications/`, booking-linked in-app notifications |
 | Contact triage | `GET/PATCH /admin/contact/:id/` |
 | My admin profile | `GET/PATCH /admin/profile/`, `POST /admin/change-password/` |
 
@@ -532,11 +533,27 @@ days is supported. Existing active bookings are skipped unless
 | Cancel | `POST /admin/bookings/:id/cancel/` | Optional `reason` |
 | Reschedule | `PATCH /admin/bookings/:id/reschedule/` | `new_slot_id` |
 | Send manual reminder | `POST /admin/bookings/:id/send-reminder/` | None |
+| Reminder history | `GET /admin/bookings/:id/reminders/` | Paginated automatic and manual reminders, newest first |
 
 Completion marks a pending payment as paid. Deleting a booking is an admin
 cancellation operation, not a hard delete; its response is a small success
 object and not a full Booking resource. Build destructive-action confirmation
 and refetch the list after a successful action.
+
+### Admin booking notifications
+
+Every customer-created booking and every booking cancellation creates one
+unread notification for each active admin. Fetch
+`GET /admin/notifications/?page=1&page_size=20`; results are
+always newest first. Filter with `read=unread` or `read=read` (the boolean
+aliases `is_read=false` and `is_read=true` are also supported).
+
+Each notification includes `booking`, `booking_reference`, `time_ago`, and
+`redirect_url` (for example `/admin/bookings/:bookingId`). On click, navigate
+to `redirect_url` and call `POST /admin/notifications/:id/mark-read/`. Use
+`POST /admin/notifications/mark-all-read/` for the bell-menu action; an
+accidental read can be reversed with `POST /admin/notifications/:id/mark-unread/`.
+The list and mark actions include `unread_count` for the notification bell.
 
 ### Dashboard, revenue, users, contacts, and reminders
 
@@ -549,12 +566,12 @@ All dashboard/revenue date filters use `start_date=YYYY-MM-DD` and
 | `GET /admin/dashboard/revenue/?period=day|week|month` | `[{ date, revenue }]` for line/bar chart. |
 | `GET /admin/dashboard/bookings/?period=day|week|month` | `[{ date, bookings, confirmed, cancelled, completed }]`. |
 | `GET /admin/dashboard/slots/` | Available, booked, blocked, total, `occupancy_rate`. |
-| `GET /admin/revenue/?payment_status=PAID` | Revenue summary: total, refunded, net, counts. |
-| `GET /admin/revenue/daily/` | `{ summary, series }`; weekly/monthly paths are analogous. |
+| `GET /analytics/?period=6m` | Aggregate summary, revenue charts, booking status, weekday, and source data. |
 | `GET /admin/users/?search=...` | Paginated non-admin users. |
 | `GET /admin/contact/?status=NEW&search=...` | Paginated contact messages. |
 | `PATCH /admin/contact/:id/` | `{ "status": "IN_PROGRESS", "admin_notes": "..." }`. |
 | `GET /admin/reminders/` | Paginated reminder audit records. |
+| `GET /admin/notifications/?read=unread` | Paginated, newest-first in-app notifications for the current admin. |
 
 Contact statuses are `NEW`, `IN_PROGRESS`, and `RESOLVED`. Chart monetary values
 are decimal strings; parse using a decimal-aware library if calculations are
