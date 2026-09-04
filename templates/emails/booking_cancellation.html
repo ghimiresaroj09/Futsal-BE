@@ -1,9 +1,90 @@
 {% extends "emails/base_email.html" %}
-{% block heading %}Booking cancelled{% endblock %}
+
+{% block title %}Booking Cancelled{% endblock %}
+
+{% block heading %}Booking Cancelled{% endblock %}
+
 {% block content %}
+
 <p>Hello {{ booking.full_name }},</p>
-<p>Your booking <strong>{{ booking.booking_reference }}</strong> for
-{{ slot.date }} {{ slot.start_time }} - {{ slot.end_time }} has been cancelled.</p>
-{% if reason %}<p><strong>Reason:</strong> {{ reason }}</p>{% endif %}
-<p>Any applicable refund will be processed as per our policy.</p>
+
+<p>
+    Your futsal booking has been successfully cancelled.
+</p>
+
+<div style="
+    margin: 24px 0;
+    padding: 20px;
+    background: #f8faf9;
+    border: 1px solid #e5ebe7;
+    border-radius: 10px;
+">
+    <p style="margin: 0 0 10px; font-size: 13px; color: #7b8794;">
+        BOOKING REFERENCE
+    </p>
+
+```
+<p style="
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #087a3f;
+    letter-spacing: 1px;
+">
+    {{ booking.booking_reference }}
+</p>
+```
+
+</div>
+
+<div style="
+    margin: 20px 0;
+    padding: 18px 20px;
+    background: #fff8f8;
+    border-left: 4px solid #dc3545;
+    border-radius: 6px;
+">
+    <p style="margin: 0 0 8px; font-weight: 600; color: #842029;">
+        Cancelled Booking
+    </p>
+
+```
+<p style="margin: 0; color: #4b5563;">
+    <strong>Date:</strong> {{ slot.date }}<br>
+    <strong>Time:</strong> {{ slot.start_time }} - {{ slot.end_time }}
+</p>
+```
+
+</div>
+
+{% if reason %}
+
+<p>
+    <strong>Cancellation Reason:</strong>
+</p>
+
+<div style="
+    margin: 12px 0 24px;
+    padding: 16px;
+    background: #f8faf9;
+    border-radius: 8px;
+    color: #4b5563;
+">
+    {{ reason }}
+</div>
+{% endif %}
+
+<p>
+    Any applicable refund will be processed according to our refund policy.
+</p>
+
+<p style="margin-top: 24px;">
+    If you have any questions regarding your cancellation or refund,
+    please contact our support team.
+</p>
+
+<p style="margin-top: 28px;">
+    Thank you for using the Futsal Management System.
+</p>
+
 {% endblock %}
