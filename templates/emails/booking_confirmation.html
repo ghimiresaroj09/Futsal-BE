@@ -1,0 +1,14 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}Booking confirmed{% endblock %}
+{% block content %}
+<p>Hello {{ booking.full_name }},</p>
+<p>Your booking is confirmed.</p>
+<ul>
+  <li><strong>Reference:</strong> {{ booking.booking_reference }}</li>
+  <li><strong>Futsal:</strong> {{ futsal.name }}</li>
+  <li><strong>Date:</strong> {{ slot.date }}</li>
+  <li><strong>Time:</strong> {{ slot.start_time }} - {{ slot.end_time }}</li>
+  <li><strong>Amount:</strong> {{ booking.amount }}</li>
+  <li><strong>Location:</strong> {{ futsal.location }}, {{ futsal.address }}</li>
+</ul>
+{% endblock %}

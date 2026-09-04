@@ -1,0 +1,9 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}Booking cancelled{% endblock %}
+{% block content %}
+<p>Hello {{ booking.full_name }},</p>
+<p>Your booking <strong>{{ booking.booking_reference }}</strong> for
+{{ slot.date }} {{ slot.start_time }} - {{ slot.end_time }} has been cancelled.</p>
+{% if reason %}<p><strong>Reason:</strong> {{ reason }}</p>{% endif %}
+<p>Any applicable refund will be processed as per our policy.</p>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}Your futsal booking is in 1 hour{% endblock %}
+{% block content %}
+<p>Hello {{ booking.full_name }},</p>
+<p>Your futsal booking is in 1 hour.</p>
+<ul>
+  <li><strong>Futsal:</strong> {{ futsal.name }}</li>
+  <li><strong>Reference:</strong> {{ booking.booking_reference }}</li>
+  <li><strong>Date:</strong> {{ slot.date }}</li>
+  <li><strong>Start:</strong> {{ slot.start_time }}</li>
+  <li><strong>End:</strong> {{ slot.end_time }}</li>
+  <li><strong>Location:</strong> {{ futsal.location }}, {{ futsal.address }}</li>
+</ul>
+{% endblock %}

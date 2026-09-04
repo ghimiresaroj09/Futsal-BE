@@ -1,0 +1,8 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}Booking rescheduled{% endblock %}
+{% block content %}
+<p>Hello {{ booking.full_name }},</p>
+<p>Booking <strong>{{ booking.booking_reference }}</strong> has been rescheduled.</p>
+<p><strong>Old:</strong> {{ old_slot.date }} {{ old_slot.start_time }} - {{ old_slot.end_time }}</p>
+<p><strong>New:</strong> {{ new_slot.date }} {{ new_slot.start_time }} - {{ new_slot.end_time }}</p>
+{% endblock %}
