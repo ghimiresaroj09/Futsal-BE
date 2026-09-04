@@ -11,6 +11,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from accounts import services
 from accounts.models import User
@@ -22,6 +24,9 @@ from accounts.serializers import (
     VerifyOTPSerializer,
 )
 from accounts.tokens import make_reset_token, read_reset_token
+from bookings.filters import BookingFilter
+from bookings.selectors import bookings_queryset
+from bookings.serializers import BookingSerializer
 from common.enums import OTPPurpose
 from common.exceptions import ServiceError
 from common.permissions import IsAdmin
@@ -257,6 +262,26 @@ class AdminUserViewSet(EnvelopeMixin, mixins.ListModelMixin, viewsets.GenericVie
     search_fields = ["full_name", "email", "phone_number"]
     ordering_fields = ["created_at", "full_name", "email"]
     ordering = ["-created_at"]
+
+    @extend_schema(
+        summary="List a non-admin user's booking history",
+        description=(
+            "Returns bookings owned by the selected non-admin user. Supports the same "
+            "filters, search, ordering, and pagination as the admin booking list."
+        ),
+        responses=BookingSerializer(many=True),
+    )
+    @action(detail=True, methods=["get"], url_path="booking-history")
+    def booking_history(self, request, pk=None):
+        """Return the selected customer's complete booking history."""
+        user = self.get_object()
+        queryset = self.filter_queryset(bookings_queryset().filter(user=user))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            return self.get_paginated_response(
+                BookingSerializer(page, many=True, context={"request": request}).data
+            )
+        return Response(BookingSerializer(queryset, many=True, context={"request": request}).data)
 
 
 @extend_schema(tags=["admin-profile"], summary="Admin change password")

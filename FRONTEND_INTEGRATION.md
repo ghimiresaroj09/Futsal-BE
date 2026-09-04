@@ -565,6 +565,7 @@ The dashboard accepts `date=YYYY-MM-DD` (defaulting to today), `futsal`, and
 | `GET /dashboard/?date=YYYY-MM-DD` | Today-focused operational stats, slot availability, schedule, and facility snapshot. |
 | `GET /analytics/?period=6m` | Aggregate summary, revenue charts, booking status, weekday, and source data. |
 | `GET /admin/users/?search=...` | Paginated non-admin users. |
+| `GET /admin/users/:id/booking-history/` | Paginated booking history for the selected non-admin user; supports the admin booking-list filters. |
 | `GET /admin/contact/?status=NEW&search=...` | Paginated contact messages. |
 | `PATCH /admin/contact/:id/` | `{ "status": "IN_PROGRESS", "admin_notes": "..." }`. |
 | `GET /admin/reminders/` | Paginated reminder audit records. |
