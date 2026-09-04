@@ -42,7 +42,7 @@ Suggested route structure:
 │  ├─ /account/bookings
 │  └─ /account/bookings/:bookingId
 └─ /admin                     ADMIN role only
-   ├─ /admin/dashboard
+   ├─ /dashboard
    ├─ /admin/venue
    ├─ /admin/media
    ├─ /admin/slots
@@ -436,7 +436,7 @@ confirms that role, but rely on the API's `403` check as well.
 
 | Admin page | APIs |
 | --- | --- |
-| Dashboard | `GET /admin/dashboard/`, plus graph endpoints |
+| Dashboard | `GET /dashboard/`, today-focused operational data |
 | Venue settings | `GET/PATCH /admin/futsal/` |
 | Gallery | `GET/POST /admin/media/`, `GET/PATCH/DELETE /admin/media/:id/` |
 | Slots | `GET/POST /admin/slots/`, `GET/PATCH/DELETE /admin/slots/:id/`; actions below |
@@ -562,10 +562,7 @@ All dashboard/revenue date filters use `start_date=YYYY-MM-DD` and
 
 | Endpoint | Returns / usage |
 | --- | --- |
-| `GET /admin/dashboard/` | `today`, `slots`, and `revenue_summary` for initial dashboard. |
-| `GET /admin/dashboard/revenue/?period=day|week|month` | `[{ date, revenue }]` for line/bar chart. |
-| `GET /admin/dashboard/bookings/?period=day|week|month` | `[{ date, bookings, confirmed, cancelled, completed }]`. |
-| `GET /admin/dashboard/slots/` | Available, booked, blocked, total, `occupancy_rate`. |
+| `GET /dashboard/?date=YYYY-MM-DD` | Today-focused operational stats, slot availability, schedule, and facility snapshot. |
 | `GET /analytics/?period=6m` | Aggregate summary, revenue charts, booking status, weekday, and source data. |
 | `GET /admin/users/?search=...` | Paginated non-admin users. |
 | `GET /admin/contact/?status=NEW&search=...` | Paginated contact messages. |
