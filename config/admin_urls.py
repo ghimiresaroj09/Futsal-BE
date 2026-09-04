@@ -7,7 +7,6 @@ Swagger tag:
     /api/v1/admin/futsal/     → admin-futsal
     /api/v1/admin/slots/      → admin-slots
     /api/v1/admin/bookings/   → admin-bookings
-    /api/v1/admin/revenue/    → admin-revenue
     /api/v1/admin/dashboard/  → admin-dashboard
     /api/v1/admin/contact/    → admin-contact
     /api/v1/admin/reminders/  → admin-reminders
@@ -62,17 +61,6 @@ notification_router.register("notifications", AdminNotificationViewSet,
 user_router = DefaultRouter()
 user_router.register("users", AdminUserViewSet, basename="admin-user")
 
-# --- revenue -----------------------------------------------------------------
-revenue_urls = [
-    path("revenue/", dashboard_views.RevenueView.as_view(), name="admin-revenue"),
-    path("revenue/daily/", dashboard_views.DailyRevenueView.as_view(),
-         name="admin-revenue-daily"),
-    path("revenue/weekly/", dashboard_views.WeeklyRevenueView.as_view(),
-         name="admin-revenue-weekly"),
-    path("revenue/monthly/", dashboard_views.MonthlyRevenueView.as_view(),
-         name="admin-revenue-monthly"),
-]
-
 # --- dashboard ---------------------------------------------------------------
 dashboard_urls = [
     path("dashboard/", dashboard_views.DashboardView.as_view(), name="admin-dashboard"),
@@ -87,7 +75,6 @@ dashboard_urls = [
 urlpatterns = [
     *profile_urls,
     *futsal_urls,
-    *revenue_urls,
     *dashboard_urls,
     path("", include(media_router.urls)),
     path("", include(slot_router.urls)),

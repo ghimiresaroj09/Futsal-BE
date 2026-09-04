@@ -223,7 +223,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "admin-slots", "description": "Slot management and bulk generation"},
         {"name": "admin-bookings", "description": "Booking management, cancel, reschedule, complete"},
         {"name": "admin-notifications", "description": "In-app booking notifications for administrators"},
-        {"name": "admin-revenue", "description": "Revenue totals: daily, weekly, monthly"},
+        {"name": "analytics", "description": "Analytics dashboard reporting"},
         {"name": "admin-dashboard", "description": "Today's overview, analytics and graph data"},
         {"name": "admin-contact", "description": "Contact message triage"},
         {"name": "admin-reminders", "description": "Reminder history and manual sending"},

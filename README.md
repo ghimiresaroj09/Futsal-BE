@@ -277,8 +277,8 @@ POST      /api/v1/admin/bookings/{id}/complete/
 POST      /api/v1/admin/bookings/{id}/cancel/
 PATCH     /api/v1/admin/bookings/{id}/reschedule/
 
-# admin-revenue
-GET       /api/v1/admin/revenue/[daily|weekly|monthly]/
+# analytics
+GET       /api/v1/analytics/
 
 # admin-dashboard
 GET       /api/v1/admin/dashboard/  /dashboard/revenue/  /dashboard/bookings/  /dashboard/slots/
@@ -309,7 +309,7 @@ its own Swagger tag, so the docs read as separate sections rather than one flat 
 | `admin-futsal` | `/admin/futsal/` | Venue configuration: pricing, opening hours |
 | `admin-slots` | `/admin/slots/` | Slot CRUD, bulk generation, whole-day closures |
 | `admin-bookings` | `/admin/bookings/` | Bookings: create, update, cancel, reschedule, complete |
-| `admin-revenue` | `/admin/revenue/` | Revenue totals and period breakdowns |
+| `analytics` | `/analytics/` | Aggregate dashboard analytics and revenue reporting |
 | `admin-dashboard` | `/admin/dashboard/` | Today's stats, occupancy, graph data |
 | `admin-contact` | `/admin/contact/` | Contact message triage |
 | `admin-reminders` | `/admin/reminders/` | Reminder history + manual send |

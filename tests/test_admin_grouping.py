@@ -5,7 +5,7 @@ pytestmark = pytest.mark.django_db
 
 EXPECTED_TAGS = {
     "admin-profile", "admin-futsal", "admin-slots", "admin-bookings",
-    "admin-revenue", "admin-dashboard", "admin-contact", "admin-reminders",
+    "admin-dashboard", "admin-contact", "admin-reminders", "analytics",
 }
 
 
@@ -33,7 +33,6 @@ def test_no_generic_admin_tag_remains(schema):
     ("/api/v1/admin/futsal/", "admin-futsal"),
     ("/api/v1/admin/slots/", "admin-slots"),
     ("/api/v1/admin/bookings/", "admin-bookings"),
-    ("/api/v1/admin/revenue/", "admin-revenue"),
     ("/api/v1/admin/dashboard/", "admin-dashboard"),
     ("/api/v1/admin/contact/", "admin-contact"),
     ("/api/v1/admin/reminders/", "admin-reminders"),
