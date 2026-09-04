@@ -289,11 +289,18 @@ GET|PATCH /api/v1/admin/contact/[{id}/]
 # admin-reminders
 GET       /api/v1/admin/reminders/[{id}/]
 POST      /api/v1/admin/bookings/{id}/send-reminder/
+GET       /api/v1/admin/bookings/{id}/reminders/
+
+# admin-notifications
+GET       /api/v1/admin/notifications/[{id}/]?read=read|unread
+POST      /api/v1/admin/notifications/{id}/mark-read/
+POST      /api/v1/admin/notifications/{id}/mark-unread/
+POST      /api/v1/admin/notifications/mark-all-read/
 ```
 
 ### Admin API grouping
 
-The admin surface is split into eight independent groups, each with its own URL prefix and
+The admin surface is split into nine independent groups, each with its own URL prefix and
 its own Swagger tag, so the docs read as separate sections rather than one flat list:
 
 | Tag | Prefix | Purpose |

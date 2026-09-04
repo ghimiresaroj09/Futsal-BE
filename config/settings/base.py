@@ -222,6 +222,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "admin-futsal", "description": "Futsal configuration (pricing, hours)"},
         {"name": "admin-slots", "description": "Slot management and bulk generation"},
         {"name": "admin-bookings", "description": "Booking management, cancel, reschedule, complete"},
+        {"name": "admin-notifications", "description": "In-app booking notifications for administrators"},
         {"name": "admin-revenue", "description": "Revenue totals: daily, weekly, monthly"},
         {"name": "admin-dashboard", "description": "Today's overview, analytics and graph data"},
         {"name": "admin-contact", "description": "Contact message triage"},

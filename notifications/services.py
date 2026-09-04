@@ -9,11 +9,79 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from bookings.models import Booking
+from accounts.models import User
+from common.enums import UserRole
 from common.enums import BookingStatus, ReminderStatus, ReminderType
 from common.exceptions import EmailDeliveryError
 from common.utils import combine_local
 from notifications.emails import send_booking_reminder_email
-from notifications.models import Reminder
+from notifications.models import AdminNotification, Reminder
+
+
+def _ordinal_day(day: int) -> str:
+    if 10 < day % 100 < 14:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+    return f"{day}{suffix}"
+
+
+def _format_slot_time(value: dt.time) -> str:
+    hour = value.hour % 12 or 12
+    minute = f":{value.minute:02d}" if value.minute else ""
+    meridiem = "am" if value.hour < 12 else "pm"
+    return f"{hour}{minute} {meridiem}"
+
+
+def booking_slot_description(booking: Booking) -> str:
+    """Return a concise, human-friendly description for an in-app event."""
+    slot = booking.slot
+    start = _format_slot_time(slot.start_time)
+    end = _format_slot_time(slot.end_time)
+    # Avoid repeating the same meridiem: "6 - 7 am", not "6 am - 7 am".
+    start_time, start_meridiem = start.rsplit(" ", 1)
+    end_time, end_meridiem = end.rsplit(" ", 1)
+    time_range = (
+        f"{start_time} - {end_time} {end_meridiem}"
+        if start_meridiem == end_meridiem
+        else f"{start} - {end}"
+    )
+    date = slot.date
+    return f"{time_range} on {_ordinal_day(date.day)} {date.strftime('%B')}"
+
+
+def _create_admin_booking_notifications(*, booking: Booking, title: str, message: str) -> int:
+    """Create one unread booking-event notification for each active administrator."""
+    recipients = User.objects.filter(role=UserRole.ADMIN, is_active=True).only("id")
+    notifications = [
+        AdminNotification(
+            recipient=admin, booking=booking, title=title, message=message,
+        )
+        for admin in recipients
+    ]
+    AdminNotification.objects.bulk_create(notifications)
+    return len(notifications)
+
+
+def create_admin_booking_notifications(*, booking: Booking) -> int:
+    """Notify admins that a customer created a booking."""
+    return _create_admin_booking_notifications(
+        booking=booking,
+        title="New booking",
+        message=f"{booking.full_name} booked a slot for {booking_slot_description(booking)}.",
+    )
+
+
+def create_admin_booking_cancellation_notifications(*, booking: Booking) -> int:
+    """Notify admins that a booking was cancelled."""
+    return _create_admin_booking_notifications(
+        booking=booking,
+        title="Booking cancelled",
+        message=(
+            f"{booking.full_name} cancelled their booking for "
+            f"{booking_slot_description(booking)}."
+        ),
+    )
 
 logger = logging.getLogger("futsal.reminders")
 

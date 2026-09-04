@@ -41,3 +41,26 @@ class Reminder(BaseModel):
 
     def __str__(self) -> str:
         return f"Reminder({self.booking_id}, {self.reminder_type}, {self.status})"
+
+
+class AdminNotification(BaseModel):
+    """An in-app notification delivered to one administrator."""
+
+    recipient = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="admin_notifications"
+    )
+    booking = models.ForeignKey(
+        "bookings.Booking", on_delete=models.CASCADE, related_name="admin_notifications"
+    )
+    title = models.CharField(max_length=150)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False, db_index=True)
+    read_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        db_table = "notifications_admin_notification"
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["recipient", "is_read", "created_at"])]
+
+    def __str__(self) -> str:
+        return f"AdminNotification({self.recipient_id}, {self.booking_id})"

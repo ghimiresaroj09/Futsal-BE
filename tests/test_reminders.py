@@ -87,6 +87,26 @@ def test_manual_reminder_tracked_separately(admin_client, booking_in_one_hour):
     assert Reminder.objects.filter(reminder_type=ReminderType.MANUAL).count() == 1
 
 
+def test_admin_can_list_reminders_for_one_booking(admin_client, booking):
+    Reminder.objects.create(
+        booking=booking, reminder_type=ReminderType.AUTOMATIC_ONE_HOUR,
+        scheduled_at=timezone.now(),
+    )
+    Reminder.objects.create(
+        booking=booking, reminder_type=ReminderType.MANUAL,
+        scheduled_at=timezone.now(),
+    )
+
+    response = admin_client.get(f"/api/v1/admin/bookings/{booking.id}/reminders/")
+
+    assert response.status_code == 200
+    data = response.data["data"]
+    assert data["count"] == 2
+    assert {item["reminder_type"] for item in data["results"]} == {
+        ReminderType.AUTOMATIC_ONE_HOUR, ReminderType.MANUAL,
+    }
+
+
 def test_manual_reminder_reports_email_failure(admin_client, booking):
     with mock.patch("notifications.services.send_booking_reminder_email",
                     side_effect=RuntimeError("SMTP down")):

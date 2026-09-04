@@ -20,7 +20,7 @@ from bookings.views import AdminBookingViewSet
 from contact.views import AdminContactViewSet
 from dashboard import views as dashboard_views
 from futsal.views import AdminFutsalMediaViewSet, AdminFutsalView, AdminSlotViewSet
-from notifications.views import AdminReminderViewSet
+from notifications.views import AdminNotificationViewSet, AdminReminderViewSet
 
 # --- profile -----------------------------------------------------------------
 profile_urls = [
@@ -52,6 +52,11 @@ contact_router.register("contact", AdminContactViewSet, basename="admin-contact"
 # --- reminders ---------------------------------------------------------------
 reminder_router = DefaultRouter()
 reminder_router.register("reminders", AdminReminderViewSet, basename="admin-reminder")
+
+# --- in-app notifications ---------------------------------------------------
+notification_router = DefaultRouter()
+notification_router.register("notifications", AdminNotificationViewSet,
+                             basename="admin-notification")
 
 # --- users ------------------------------------------------------------------
 user_router = DefaultRouter()
@@ -89,5 +94,6 @@ urlpatterns = [
     path("", include(booking_router.urls)),
     path("", include(contact_router.urls)),
     path("", include(reminder_router.urls)),
+    path("", include(notification_router.urls)),
     path("", include(user_router.urls)),
 ]

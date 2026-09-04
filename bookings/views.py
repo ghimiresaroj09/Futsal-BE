@@ -22,6 +22,7 @@ from common.enums import BookingSource, BookingStatus
 from common.mixins import EnvelopeMixin
 from common.permissions import IsAdmin
 from common.responses import success_response
+from notifications.serializers import ReminderSerializer
 
 
 @extend_schema(tags=["bookings"])
@@ -238,3 +239,21 @@ class AdminBookingViewSet(EnvelopeMixin, viewsets.ModelViewSet):
         reminder = send_manual_reminder(booking=booking, actor=request.user)
         return success_response(data=ReminderSerializer(reminder).data,
                                 message="Reminder sent successfully.")
+
+    @extend_schema(
+        tags=["admin-reminders"],
+        summary="List reminders for one booking",
+        description="Returns automatic and manually sent reminder records for this booking, newest first.",
+        responses=ReminderSerializer(many=True),
+    )
+    @action(detail=True, methods=["get"], url_path="reminders")
+    def reminders(self, request, pk=None):
+        """Return the reminder history for the selected booking."""
+        from notifications.models import Reminder
+
+        booking = self.get_object()
+        queryset = Reminder.objects.filter(booking=booking).order_by("-created_at")
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            return self.get_paginated_response(ReminderSerializer(page, many=True).data)
+        return Response(ReminderSerializer(queryset, many=True).data)
