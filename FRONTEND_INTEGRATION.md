@@ -557,8 +557,8 @@ The list and mark actions include `unread_count` for the notification bell.
 
 ### Dashboard, revenue, users, contacts, and reminders
 
-All dashboard/revenue date filters use `start_date=YYYY-MM-DD` and
-`end_date=YYYY-MM-DD`.
+The dashboard accepts `date=YYYY-MM-DD` (defaulting to today), `futsal`, and
+`timezone`.
 
 | Endpoint | Returns / usage |
 | --- | --- |

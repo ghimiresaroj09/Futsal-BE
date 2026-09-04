@@ -1,4 +1,4 @@
-"""Admin dashboard and revenue APIs."""
+"""Analytics and operational dashboard APIs."""
 from __future__ import annotations
 
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -13,15 +13,6 @@ from common.utils import parse_date
 from dashboard.selectors import analytics, operational_dashboard
 from futsal.models import Futsal
 
-PERIOD_PARAM = OpenApiParameter(
-    "period", str, description="Grouping period: day | week | month (default: day)"
-)
-DATE_PARAMS = [
-    OpenApiParameter("start_date", str, description="Start date YYYY-MM-DD"),
-    OpenApiParameter("end_date", str, description="End date YYYY-MM-DD"),
-]
-
-
 class EmptySerializer(serializers.Serializer):
     """Placeholder for read-only analytics endpoints (no request body)."""
 
@@ -33,11 +24,6 @@ class AdminBaseView(APIView):
     def range(self, request):
         return (parse_date(request.query_params.get("start_date")),
                 parse_date(request.query_params.get("end_date")))
-
-    def period(self, request) -> str:
-        period = (request.query_params.get("period") or "day").lower()
-        return period if period in {"day", "week", "month"} else "day"
-
 
 @extend_schema(tags=["analytics"], responses={200: dict}, summary="Analytics dashboard", parameters=[
     OpenApiParameter("start_date", str, description="Start date YYYY-MM-DD"),
