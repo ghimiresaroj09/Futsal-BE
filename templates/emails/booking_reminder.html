@@ -1,14 +1,124 @@
 {% extends "emails/base_email.html" %}
-{% block heading %}Your futsal booking is in 1 hour{% endblock %}
+
+{% block title %}Booking Reminder - 1 Hour to Go{% endblock %}
+
+{% block heading %}Your Booking Is in 1 Hour{% endblock %}
+
 {% block content %}
+
 <p>Hello {{ booking.full_name }},</p>
-<p>Your futsal booking is in 1 hour.</p>
-<ul>
-  <li><strong>Futsal:</strong> {{ futsal.name }}</li>
-  <li><strong>Reference:</strong> {{ booking.booking_reference }}</li>
-  <li><strong>Date:</strong> {{ slot.date }}</li>
-  <li><strong>Start:</strong> {{ slot.start_time }}</li>
-  <li><strong>End:</strong> {{ slot.end_time }}</li>
-  <li><strong>Location:</strong> {{ futsal.location }}, {{ futsal.address }}</li>
-</ul>
+
+<p>
+    Just a reminder that your futsal booking starts in
+    <strong>1 hour</strong>. Get ready and we'll see you on the court!
+</p>
+
+<div style="
+    margin: 24px 0;
+    padding: 20px;
+    background: #f0faf4;
+    border: 1px solid #ccebd8;
+    border-radius: 10px;
+    text-align: center;
+">
+    <p style="
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #5f6c72;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    ">
+        Starting In
+    </p>
+
+```
+<p style="
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #087a3f;
+">
+    1 Hour
+</p>
+
+<p style="
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: #5f6c72;
+">
+    Your court is waiting for you!
+</p>
+```
+
+</div>
+
+<div style="
+    margin: 24px 0;
+    padding: 20px;
+    background: #f8faf9;
+    border: 1px solid #e5ebe7;
+    border-radius: 10px;
+">
+
+```
+<p style="
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2933;
+">
+    Booking Details
+</p>
+
+<p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;">
+    <strong>Futsal:</strong> {{ futsal.name }}
+</p>
+
+<p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;">
+    <strong>Reference:</strong> {{ booking.booking_reference }}
+</p>
+
+<p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;">
+    <strong>Date:</strong> {{ slot.date }}
+</p>
+
+<p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;">
+    <strong>Start:</strong> {{ slot.start_time }}
+</p>
+
+<p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;">
+    <strong>End:</strong> {{ slot.end_time }}
+</p>
+
+<p style="margin: 0; color: #4b5563; font-size: 14px;">
+    <strong>Location:</strong><br>
+    {{ futsal.location }}, {{ futsal.address }}
+</p>
+```
+
+</div>
+
+<div style="
+    margin: 24px 0;
+    padding: 16px 18px;
+    background: #fff8e6;
+    border-left: 4px solid #f0ad4e;
+    border-radius: 6px;
+">
+    <p style="
+        margin: 0;
+        font-size: 13px;
+        color: #664d03;
+    ">
+        <strong>Reminder:</strong> Please arrive a few minutes early so you
+        have enough time to get ready before your booking starts.
+    </p>
+</div>
+
+<p>
+    Thank you for choosing our Futsal Management System.
+    Enjoy your game!
+</p>
+
 {% endblock %}
