@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 
+from django.db.models import Q
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
@@ -266,8 +267,9 @@ class AdminUserViewSet(EnvelopeMixin, mixins.ListModelMixin, viewsets.GenericVie
     @extend_schema(
         summary="List a non-admin user's booking history",
         description=(
-            "Returns bookings owned by the selected non-admin user. Supports the same "
-            "filters, search, ordering, and pagination as the admin booking list."
+            "Returns bookings owned by the selected non-admin user, including bookings "
+            "an admin created on their behalf using the user's email address. Supports "
+            "the same filters, search, ordering, and pagination as the admin booking list."
         ),
         responses=BookingSerializer(many=True),
     )
@@ -275,7 +277,11 @@ class AdminUserViewSet(EnvelopeMixin, mixins.ListModelMixin, viewsets.GenericVie
     def booking_history(self, request, pk=None):
         """Return the selected customer's complete booking history."""
         user = self.get_object()
-        queryset = self.filter_queryset(bookings_queryset().filter(user=user))
+        queryset = self.filter_queryset(
+            bookings_queryset().filter(
+                Q(user=user) | Q(booking_source="ADMIN", email__iexact=user.email)
+            )
+        )
         page = self.paginate_queryset(queryset)
         if page is not None:
             return self.get_paginated_response(

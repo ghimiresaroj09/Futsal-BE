@@ -88,6 +88,11 @@ def second_slot(futsal) -> Slot:
 
 
 @pytest.fixture
+def third_slot(futsal) -> Slot:
+    return make_slot(futsal, hour=14)
+
+
+@pytest.fixture
 def past_slot(futsal) -> Slot:
     yesterday = local_today() - dt.timedelta(days=1)
     return Slot.objects.create(futsal=futsal, date=yesterday,
