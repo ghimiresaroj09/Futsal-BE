@@ -393,9 +393,10 @@ Content-Type: application/json
 | Reschedule | `PATCH /bookings/:id/reschedule/` | `{ "new_slot_id": "<uuid>" }` |
 | Cancel | `POST /bookings/:id/cancel/` | `{ "reason": "Optional reason" }` |
 
-Only the authenticated owner can access these resources. A customer booking is
-created `CONFIRMED` with a `PENDING` cash payment record. Cancellation releases
-the slot and refunds the associated payment record. A reschedule is atomic,
+The authenticated customer can access bookings they created and bookings an admin
+created for their email address. A customer booking is created `CONFIRMED` with a
+`PENDING` cash payment record. Cancellation releases the slot and refunds the
+associated payment record. A reschedule is atomic,
 changes the status to `RESCHEDULED`, reserves the new slot, and releases the old
 one.
 

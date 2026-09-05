@@ -122,11 +122,26 @@ def test_booking_validation_errors(user_client, slot):
     assert "full_name" in response.data["errors"]
 
 
-def test_user_sees_only_own_bookings(user_client, booking, other_user, second_slot):
+def test_user_sees_own_and_admin_created_bookings(
+    user_client, admin_user, user, booking, other_user, second_slot, third_slot
+):
     create_booking(slot_id=second_slot.id, full_name="Other", email="other@example.com",
                    phone_number="9800000012", user=other_user)
+    admin_created_booking = create_booking(
+        slot_id=third_slot.id,
+        full_name=user.full_name,
+        email=user.email,
+        phone_number=user.phone_number,
+        created_by=admin_user,
+        source=BookingSource.ADMIN,
+    )
+
     response = user_client.get(BOOKINGS_URL)
-    assert response.data["data"]["count"] == 1
+    results = response.data["data"]
+    assert results["count"] == 2
+    assert {item["id"] for item in results["results"]} == {
+        str(booking.id), str(admin_created_booking.id)
+    }
 
 
 def test_booking_history_filters(user_client, booking):

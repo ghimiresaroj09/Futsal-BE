@@ -40,8 +40,11 @@ def test_admin_user_list_excludes_admins(admin_client, user, other_user, admin_u
     assert admin_user.email not in emails
 
 
-def test_admin_can_view_a_users_booking_history(admin_client, user, other_user, booking, second_slot):
+def test_admin_can_view_a_users_booking_history(
+    admin_client, admin_user, user, other_user, booking, second_slot, third_slot
+):
     from bookings.services import create_booking
+    from common.enums import BookingSource
 
     other_booking = create_booking(
         slot_id=second_slot.id,
@@ -50,13 +53,23 @@ def test_admin_can_view_a_users_booking_history(admin_client, user, other_user, 
         phone_number=other_user.phone_number,
         user=other_user,
     )
+    admin_created_booking = create_booking(
+        slot_id=third_slot.id,
+        full_name=user.full_name,
+        email=user.email,
+        phone_number=user.phone_number,
+        created_by=admin_user,
+        source=BookingSource.ADMIN,
+    )
 
     response = admin_client.get(f"/api/v1/admin/users/{user.id}/booking-history/?status=CONFIRMED")
 
     assert response.status_code == 200
     history = response.data["data"]
-    assert history["count"] == 1
-    assert history["results"][0]["id"] == str(booking.id)
+    assert history["count"] == 2
+    assert {item["id"] for item in history["results"]} == {
+        str(booking.id), str(admin_created_booking.id)
+    }
     assert str(other_booking.id) not in {item["id"] for item in history["results"]}
 
 
