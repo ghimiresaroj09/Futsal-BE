@@ -15,12 +15,19 @@ class BookingSerializer(serializers.ModelSerializer):
     futsal_name = serializers.CharField(source="futsal.name", read_only=True)
     payment_status = serializers.CharField(source="payment.payment_status", read_only=True,
                                            default=None)
+    payment_method = serializers.CharField(source="payment.payment_method", read_only=True,
+                                           default=None)
+    advance_amount = serializers.DecimalField(source="payment.advance_amount", max_digits=10,
+                                              decimal_places=2, read_only=True, default=None)
+    remaining_amount = serializers.DecimalField(source="payment.remaining_amount", max_digits=10,
+                                                decimal_places=2, read_only=True, default=None)
 
     class Meta:
         model = Booking
         fields = [
             "id", "booking_reference", "slot", "futsal_name", "full_name",
             "email", "phone_number", "amount", "status", "booking_source", "payment_status",
+            "payment_method", "advance_amount", "remaining_amount",
             "cancelled_at", "cancellation_reason", "notes", "created_at", "updated_at",
         ]
         read_only_fields = fields
@@ -78,8 +85,10 @@ class AdminBookingCreateSerializer(BookingCreateSerializer):
                                              default=PaymentMethod.CASH)
     status = serializers.ChoiceField(
         choices=[BookingStatus.PENDING, BookingStatus.CONFIRMED],
-        default=BookingStatus.CONFIRMED,
+        default=BookingStatus.PENDING,
     )
+    advance_amount = serializers.DecimalField(max_digits=10, decimal_places=2, required=False,
+                                              min_value=0)
 
 
 class RescheduleSerializer(serializers.Serializer):
@@ -98,3 +107,6 @@ class AdminBookingUpdateSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=20, required=False)
     notes = serializers.CharField(required=False, allow_blank=True)
     reason = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    advance_amount = serializers.DecimalField(max_digits=10, decimal_places=2, required=False,
+                                              min_value=0)
+    payment_method = serializers.ChoiceField(choices=PaymentMethod.choices, required=False)

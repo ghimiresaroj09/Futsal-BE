@@ -75,3 +75,13 @@ def send_booking_reminder_email(booking) -> None:
         template="booking_reminder",
         context={"booking": booking, "slot": booking.slot, "futsal": booking.futsal},
     )
+
+
+def send_manual_booking_reminder_email(booking) -> None:
+    """Send a general reminder that does not imply a fixed start-time window."""
+    send_html_email(
+        subject=f"Reminder: your futsal booking {booking.booking_reference}",
+        to=booking.email,
+        template="booking_manual_reminder",
+        context={"booking": booking, "slot": booking.slot, "futsal": booking.futsal},
+    )

@@ -77,7 +77,7 @@ def create_booking(
     *, slot_id, full_name: str, email: str, phone_number: str,
     user=None, created_by=None, source: str = BookingSource.USER,
     payment_method: str = PaymentMethod.CASH, payment_status: str = PaymentStatus.PENDING,
-    status: str = BookingStatus.CONFIRMED, notes: str = "",
+    advance_amount: Decimal | None = None, status: str = BookingStatus.CONFIRMED, notes: str = "",
 ) -> Booking:
     """Create a booking atomically. Raises 409 ConflictError on double booking."""
     slot = _lock_slot(slot_id)
@@ -113,13 +113,15 @@ def create_booking(
     slot.status = SlotStatus.BOOKED
 
     create_payment_for_booking(
-        booking=booking, amount=amount, method=payment_method, status=payment_status
+        booking=booking, amount=amount, method=payment_method, status=payment_status,
+        advance_amount=advance_amount,
     )
     logger.info("Booking created reference=%s slot=%s source=%s",
                 booking.booking_reference, slot.pk, source)
     if source == BookingSource.USER:
         create_admin_booking_notifications(booking=booking)
-    transaction.on_commit(lambda: _safe_email(send_booking_confirmation_email, booking))
+    # Creating a request never emails the customer. The confirmation email is
+    # sent only when an administrator explicitly changes its status to confirmed.
     return booking
 
 
@@ -203,9 +205,11 @@ def change_booking_status(*, booking: Booking, new_status: str, actor=None,
     assert_transition(booking.status, new_status)
     booking.status = new_status
     booking.save(update_fields=["status", "updated_at"])
+    if new_status == BookingStatus.CONFIRMED:
+        transaction.on_commit(lambda: _safe_email(send_booking_confirmation_email, booking))
     if new_status == BookingStatus.COMPLETED:
         payment = Payment.objects.filter(booking=booking).first()
-        if payment and payment.payment_status == PaymentStatus.PENDING:
+        if payment and payment.payment_status in {PaymentStatus.PENDING, PaymentStatus.ADVANCED}:
             from payments.services import mark_paid
 
             mark_paid(payment)

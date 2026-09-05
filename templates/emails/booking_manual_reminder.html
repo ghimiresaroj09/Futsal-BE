@@ -1,0 +1,22 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Booking Reminder{% endblock %}
+
+{% block heading %}Booking Reminder{% endblock %}
+
+{% block content %}
+<p>Hello {{ booking.full_name }},</p>
+
+<p>This is a reminder from the futsal team about your upcoming booking.</p>
+
+<div style="margin: 24px 0; padding: 20px; background: #f8faf9; border: 1px solid #e5ebe7; border-radius: 10px;">
+    <p style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: #1f2933;">Booking Details</p>
+    <p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;"><strong>Futsal:</strong> {{ futsal.name }}</p>
+    <p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;"><strong>Reference:</strong> {{ booking.booking_reference }}</p>
+    <p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;"><strong>Date:</strong> {{ slot.date }}</p>
+    <p style="margin: 0 0 10px; color: #4b5563; font-size: 14px;"><strong>Start:</strong> {{ slot.start_time }}</p>
+    <p style="margin: 0; color: #4b5563; font-size: 14px;"><strong>End:</strong> {{ slot.end_time }}</p>
+</div>
+
+<p>Please keep your booking reference handy. We look forward to seeing you on the court!</p>
+{% endblock %}

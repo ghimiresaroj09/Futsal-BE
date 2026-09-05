@@ -71,6 +71,7 @@ class BookingViewSet(EnvelopeMixin, viewsets.ModelViewSet):
             user=request.user,
             created_by=request.user,
             source=BookingSource.USER,
+            status=BookingStatus.PENDING,
         )
         return success_response(
             data=BookingSerializer(booking).data,
@@ -157,7 +158,8 @@ class AdminBookingViewSet(EnvelopeMixin, viewsets.ModelViewSet):
             created_by=request.user,
             source=BookingSource.ADMIN,
             payment_method=data.get("payment_method"),
-            status=data.get("status", BookingStatus.CONFIRMED),
+            advance_amount=data.get("advance_amount"),
+            status=data.get("status", BookingStatus.PENDING),
         )
         return success_response(data=BookingSerializer(booking).data,
                                 message="Booking created successfully.",
@@ -172,6 +174,14 @@ class AdminBookingViewSet(EnvelopeMixin, viewsets.ModelViewSet):
             if field in data:
                 setattr(booking, field, data[field])
         booking.save()
+        if "advance_amount" in data or "payment_method" in data:
+            from payments.services import update_payment_details
+
+            update_payment_details(
+                payment=booking.payment,
+                advance_amount=data.get("advance_amount") if "advance_amount" in data else None,
+                payment_method=data.get("payment_method"),
+            )
         if "status" in data:
             booking = services.change_booking_status(
                 booking=booking, new_status=data["status"], actor=request.user,
