@@ -78,6 +78,8 @@ def test_manual_reminder_endpoint(admin_client, booking):
     assert response.status_code == 200
     assert response.data["data"]["reminder_type"] == ReminderType.MANUAL
     assert len(mail.outbox) == 1
+    assert "1 hour" not in mail.outbox[0].subject.lower()
+    assert "1 hour" not in mail.outbox[0].body.lower()
 
 
 def test_manual_reminder_tracked_separately(admin_client, booking_in_one_hour):
@@ -108,7 +110,7 @@ def test_admin_can_list_reminders_for_one_booking(admin_client, booking):
 
 
 def test_manual_reminder_reports_email_failure(admin_client, booking):
-    with mock.patch("notifications.services.send_booking_reminder_email",
+    with mock.patch("notifications.services.send_manual_booking_reminder_email",
                     side_effect=RuntimeError("SMTP down")):
         response = admin_client.post(f"/api/v1/admin/bookings/{booking.id}/send-reminder/")
     assert response.status_code == 502

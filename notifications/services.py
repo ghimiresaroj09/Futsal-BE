@@ -14,7 +14,9 @@ from common.enums import UserRole
 from common.enums import BookingStatus, ReminderStatus, ReminderType
 from common.exceptions import EmailDeliveryError
 from common.utils import combine_local
-from notifications.emails import send_booking_reminder_email
+from notifications.emails import (
+    send_booking_reminder_email, send_manual_booking_reminder_email,
+)
 from notifications.models import AdminNotification, Reminder
 
 
@@ -85,8 +87,9 @@ def create_admin_booking_cancellation_notifications(*, booking: Booking) -> int:
 
 logger = logging.getLogger("futsal.reminders")
 
-REMINDER_ELIGIBLE_STATUSES = [BookingStatus.PENDING, BookingStatus.CONFIRMED,
-                              BookingStatus.RESCHEDULED]
+# Customers must not receive automatic reminders until their request has been
+# confirmed. A rescheduled booking was previously confirmed.
+REMINDER_ELIGIBLE_STATUSES = [BookingStatus.CONFIRMED, BookingStatus.RESCHEDULED]
 
 
 def upcoming_bookings_needing_reminder(now: dt.datetime | None = None):
@@ -112,7 +115,12 @@ def upcoming_bookings_needing_reminder(now: dt.datetime | None = None):
 
 def _deliver(reminder: Reminder, booking: Booking) -> Reminder:
     try:
-        send_booking_reminder_email(booking)
+        sender = (
+            send_manual_booking_reminder_email
+            if reminder.reminder_type == ReminderType.MANUAL
+            else send_booking_reminder_email
+        )
+        sender(booking)
     except Exception as exc:  # noqa: BLE001
         reminder.status = ReminderStatus.FAILED
         reminder.error_message = str(exc)[:1000]

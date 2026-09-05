@@ -3,6 +3,9 @@ from decimal import Decimal
 
 import pytest
 
+from bookings.services import create_booking
+from common.enums import PaymentStatus
+
 pytestmark = pytest.mark.django_db
 
 
@@ -26,3 +29,17 @@ def test_analytics_rejects_invalid_period_and_date_range(admin_client):
 
 def test_analytics_requires_admin(user_client):
     assert user_client.get("/api/v1/analytics/").status_code == 403
+
+
+def test_analytics_excludes_advanced_payments_from_revenue(admin_client, user, slot):
+    create_booking(
+        slot_id=slot.id, full_name="Advance User", email="advance@example.com",
+        phone_number="9800000093", user=user, advance_amount=Decimal("200.00"),
+    )
+
+    response = admin_client.get(
+        f"/api/v1/analytics/?start_date={slot.date}&end_date={slot.date}"
+    )
+
+    assert response.status_code == 200
+    assert Decimal(str(response.data["data"]["summary"]["total_revenue"])) == Decimal("0.00")

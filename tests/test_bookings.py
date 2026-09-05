@@ -2,11 +2,13 @@
 from decimal import Decimal
 
 import pytest
+from django.core import mail
 
 from bookings.models import Booking
 from bookings.services import cancel_booking, create_booking, mark_completed
 from common.enums import BookingSource, BookingStatus, PaymentStatus, SlotStatus
 from common.exceptions import ConflictError, ServiceError
+from notifications.models import AdminNotification
 
 pytestmark = pytest.mark.django_db
 
@@ -26,6 +28,31 @@ def test_user_can_book_available_slot(user_client, slot):
     assert data["booking_reference"].startswith("FSL-")
     slot.refresh_from_db()
     assert slot.status == SlotStatus.BOOKED
+
+
+@pytest.mark.django_db(transaction=True)
+def test_customer_booking_is_pending_notifies_admin_and_waits_to_email(
+    user_client, admin_client, admin_user, slot
+):
+    """The customer is emailed only when an admin confirms the request."""
+    mail.outbox.clear()
+
+    response = user_client.post(BOOKINGS_URL, body(slot), format="json")
+
+    assert response.status_code == 201
+    booking = Booking.objects.get(pk=response.data["data"]["id"])
+    assert booking.status == BookingStatus.PENDING
+    assert AdminNotification.objects.filter(recipient=admin_user, booking=booking).exists()
+    assert len(mail.outbox) == 0
+
+    response = admin_client.patch(
+        f"{ADMIN_BOOKINGS_URL}{booking.id}/", {"status": BookingStatus.CONFIRMED}, format="json"
+    )
+
+    assert response.status_code == 200
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == [booking.email]
+    assert "Booking confirmed" in mail.outbox[0].subject
 
 
 def test_user_can_update_booking_contact_details(user_client, booking):
@@ -206,6 +233,77 @@ def test_admin_can_create_booking_on_behalf(admin_client, slot):
     assert response.data["data"]["booking_source"] == BookingSource.ADMIN
     booking = Booking.objects.get()
     assert booking.created_by is not None
+
+
+def test_admin_can_record_and_update_an_advance_payment(admin_client, slot):
+    response = admin_client.post(
+        ADMIN_BOOKINGS_URL,
+        {**body(slot), "advance_amount": "250.00", "payment_method": "ESEWA"},
+        format="json",
+    )
+
+    assert response.status_code == 201
+    data = response.data["data"]
+    assert data["payment_status"] == PaymentStatus.ADVANCED
+    assert Decimal(data["advance_amount"]) == Decimal("250.00")
+    assert Decimal(data["remaining_amount"]) == Decimal("750.00")
+    assert data["payment_method"] == "ESEWA"
+
+    response = admin_client.patch(
+        f"{ADMIN_BOOKINGS_URL}{data['id']}/",
+        {"advance_amount": "400.00", "payment_method": "KHALTI"},
+        format="json",
+    )
+
+    assert response.status_code == 200
+    data = response.data["data"]
+    assert data["payment_status"] == PaymentStatus.ADVANCED
+    assert Decimal(data["advance_amount"]) == Decimal("400.00")
+    assert Decimal(data["remaining_amount"]) == Decimal("600.00")
+    assert data["payment_method"] == "KHALTI"
+
+
+def test_completion_marks_advanced_payment_paid_and_cancellation_refunds_advance(
+    admin_client, user, slot, second_slot
+):
+    advanced = create_booking(
+        slot_id=slot.id, full_name="Advance User", email="advance@example.com",
+        phone_number="9800000091", user=user, advance_amount=Decimal("200.00"),
+    )
+    response = admin_client.patch(
+        f"{ADMIN_BOOKINGS_URL}{advanced.id}/", {"status": BookingStatus.COMPLETED}, format="json"
+    )
+    assert response.status_code == 200
+    advanced.refresh_from_db()
+    assert advanced.payment.payment_status == PaymentStatus.PAID
+
+    refundable = create_booking(
+        slot_id=second_slot.id, full_name="Refund User", email="refund@example.com",
+        phone_number="9800000092", user=user, advance_amount=Decimal("300.00"),
+    )
+    cancel_booking(booking=refundable)
+    refundable.refresh_from_db()
+    assert refundable.payment.payment_status == PaymentStatus.REFUNDED
+    assert refundable.payment.refunded_amount == Decimal("300.00")
+
+
+@pytest.mark.django_db(transaction=True)
+def test_admin_pending_booking_does_not_email_until_confirmed(admin_client, slot):
+    mail.outbox.clear()
+
+    response = admin_client.post(ADMIN_BOOKINGS_URL, body(slot), format="json")
+
+    assert response.status_code == 201
+    booking = Booking.objects.get(pk=response.data["data"]["id"])
+    assert booking.status == BookingStatus.PENDING
+    assert len(mail.outbox) == 0
+
+    response = admin_client.patch(
+        f"{ADMIN_BOOKINGS_URL}{booking.id}/", {"status": BookingStatus.CONFIRMED}, format="json"
+    )
+
+    assert response.status_code == 200
+    assert len(mail.outbox) == 1
 
 
 def test_admin_booking_respects_double_booking_protection(admin_client, slot, booking):

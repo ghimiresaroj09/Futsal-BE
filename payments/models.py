@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import F
 
 from common.enums import PaymentMethod, PaymentStatus
 from common.models import BaseModel
@@ -22,6 +23,9 @@ class Payment(BaseModel):
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
     )
     refunded_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    advance_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, validators=[MinValueValidator(0)]
+    )
     payment_status = models.CharField(
         max_length=10, choices=PaymentStatus.choices,
         default=PaymentStatus.PENDING, db_index=True,
@@ -38,8 +42,16 @@ class Payment(BaseModel):
         constraints = [
             models.CheckConstraint(condition=models.Q(amount__gte=0),
                                    name="payment_amount_non_negative"),
+            models.CheckConstraint(
+                condition=models.Q(advance_amount__gte=0, advance_amount__lte=F("amount")),
+                name="payment_advance_within_amount",
+            ),
         ]
         indexes = [models.Index(fields=["payment_status", "paid_at"])]
 
     def __str__(self) -> str:
         return f"Payment({self.booking_id}, {self.amount}, {self.payment_status})"
+
+    @property
+    def remaining_amount(self):
+        return self.amount - self.advance_amount

@@ -35,15 +35,14 @@ def revenue_summary(start=None, end=None, payment_status=None, futsal_id=None) -
     qs = payments_in_range(start, end, payment_status, futsal_id)
     agg = qs.aggregate(
         total_revenue=Coalesce(
-            Sum("amount", filter=Q(payment_status__in=[PaymentStatus.PAID,
-                                                       PaymentStatus.REFUNDED])), _zero()
+            Sum("amount", filter=Q(payment_status=PaymentStatus.PAID)), _zero()
         ),
         refunded_amount=Coalesce(Sum("refunded_amount"), _zero()),
         number_of_bookings=Count("id"),
         paid_bookings=Count("id", filter=Q(payment_status=PaymentStatus.PAID)),
         cancelled_bookings=Count("id", filter=Q(booking__status=BookingStatus.CANCELLED)),
     )
-    agg["net_revenue"] = agg["total_revenue"] - agg["refunded_amount"]
+    agg["net_revenue"] = agg["total_revenue"]
     return agg
 
 

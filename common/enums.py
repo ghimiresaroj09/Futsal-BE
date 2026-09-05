@@ -33,6 +33,7 @@ class BookingSource(models.TextChoices):
 
 class PaymentStatus(models.TextChoices):
     PENDING = "PENDING", "Pending"
+    ADVANCED = "ADVANCED", "Advanced"
     PAID = "PAID", "Paid"
     FAILED = "FAILED", "Failed"
     REFUNDED = "REFUNDED", "Refunded"
