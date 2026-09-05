@@ -5,7 +5,7 @@ import pytest
 from django.core import mail
 
 from bookings.models import Booking
-from bookings.services import cancel_booking, create_booking, mark_completed
+from bookings.services import cancel_booking, create_booking, mark_completed, reschedule_booking
 from common.enums import BookingSource, BookingStatus, PaymentStatus, SlotStatus
 from common.exceptions import ConflictError, ServiceError
 from notifications.models import AdminNotification
@@ -261,6 +261,48 @@ def test_admin_can_record_and_update_an_advance_payment(admin_client, slot):
     assert Decimal(data["advance_amount"]) == Decimal("400.00")
     assert Decimal(data["remaining_amount"]) == Decimal("600.00")
     assert data["payment_method"] == "KHALTI"
+
+
+@pytest.mark.parametrize("booking_status", [BookingStatus.PENDING, BookingStatus.RESCHEDULED])
+def test_admin_can_edit_booking_when_submitting_its_unchanged_status(
+    admin_client, user, slot, second_slot, booking_status
+):
+    booking = create_booking(
+        slot_id=slot.id,
+        full_name="Original Name",
+        email="original@example.com",
+        phone_number="9800000001",
+        user=user,
+        status=BookingStatus.PENDING,
+    )
+    if booking_status == BookingStatus.RESCHEDULED:
+        booking = reschedule_booking(
+            booking=booking, new_slot_id=second_slot.id,
+        )
+
+    response = admin_client.patch(
+        f"{ADMIN_BOOKINGS_URL}{booking.id}/",
+        {
+            "status": booking_status,
+            "full_name": "Saroj Ghimire",
+            "email": "ghimires090@gmail.com",
+            "phone_number": "9843951178",
+            "notes": "We are ready",
+            "advance_amount": "500.00",
+            "payment_method": "ESEWA",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 200
+    booking.refresh_from_db()
+    assert booking.status == booking_status
+    assert booking.full_name == "Saroj Ghimire"
+    assert booking.email == "ghimires090@gmail.com"
+    assert booking.phone_number == "9843951178"
+    assert booking.notes == "We are ready"
+    assert booking.payment.advance_amount == Decimal("500.00")
+    assert booking.payment.payment_method == "ESEWA"
 
 
 def test_completion_marks_advanced_payment_paid_and_cancellation_refunds_advance(

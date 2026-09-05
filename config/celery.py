@@ -17,6 +17,10 @@ app.conf.beat_schedule = {
         "task": "notifications.dispatch_due_reminders",
         "schedule": crontab(minute="*/5"),
     },
+    "complete-expired-bookings": {
+        "task": "bookings.complete_expired_bookings",
+        "schedule": crontab(minute="*/5"),
+    },
 }
 
 

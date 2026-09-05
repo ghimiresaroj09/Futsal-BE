@@ -57,6 +57,7 @@ class CronReminderView(APIView):
             send_automatic_reminder,
             upcoming_bookings_needing_reminder,
         )
+        from bookings.services import complete_expired_bookings
 
         sent = failed = 0
         for booking in upcoming_bookings_needing_reminder():
@@ -67,10 +68,12 @@ class CronReminderView(APIView):
                 failed += 1
                 logger.exception("Reminder failed for booking %s", booking.pk)
 
-        logger.info("cron reminders sent=%d failed=%d", sent, failed)
+        completed = complete_expired_bookings()
+
+        logger.info("cron reminders sent=%d failed=%d completed=%d", sent, failed, completed)
         return success_response(
-            data={"sent": sent, "failed": failed},
-            message="Reminder dispatch completed.",
+            data={"sent": sent, "failed": failed, "completed": completed},
+            message="Booking maintenance completed.",
         )
 
     @extend_schema(

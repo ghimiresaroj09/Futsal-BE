@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import logging
+import datetime as dt
 from decimal import Decimal
 
 from django.db import IntegrityError, transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.conf import settings
 from django.utils import timezone
 
@@ -220,3 +221,40 @@ def change_booking_status(*, booking: Booking, new_status: str, actor=None,
 
 def mark_completed(*, booking: Booking, actor=None) -> Booking:
     return change_booking_status(booking=booking, new_status=BookingStatus.COMPLETED, actor=actor)
+
+
+@transaction.atomic
+def complete_expired_bookings(*, now: dt.datetime | None = None) -> int:
+    """Complete bookings whose local slot end time has passed.
+
+    This is intentionally idempotent so it can safely run from both Celery Beat
+    and the HTTP cron fallback.  A pending booking can expire before an admin
+    acts on it, so all unfinished booking states are included.
+    """
+    now = now or local_now()
+    completable_statuses = [
+        BookingStatus.PENDING,
+        BookingStatus.CONFIRMED,
+        BookingStatus.RESCHEDULED,
+    ]
+    expired = (
+        Booking.objects.select_for_update()
+        .select_related("payment", "slot")
+        .filter(status__in=completable_statuses)
+        .filter(Q(slot__date__lt=now.date()) | Q(
+            slot__date=now.date(), slot__end_time__lt=now.time()
+        ))
+    )
+
+    completed = 0
+    for booking in expired:
+        booking.status = BookingStatus.COMPLETED
+        booking.save(update_fields=["status", "updated_at"])
+        if booking.payment.payment_status in {PaymentStatus.PENDING, PaymentStatus.ADVANCED}:
+            from payments.services import mark_paid
+
+            mark_paid(booking.payment)
+        completed += 1
+
+    logger.info("complete_expired_bookings completed=%d", completed)
+    return completed
