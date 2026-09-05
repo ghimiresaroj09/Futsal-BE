@@ -182,7 +182,10 @@ class AdminBookingViewSet(EnvelopeMixin, viewsets.ModelViewSet):
                 advance_amount=data.get("advance_amount") if "advance_amount" in data else None,
                 payment_method=data.get("payment_method"),
             )
-        if "status" in data:
+        # Frontends commonly submit the complete edit form, including the
+        # current status.  A status transition is only needed when it actually
+        # changes; otherwise contact/payment edits must remain valid.
+        if "status" in data and data["status"] != booking.status:
             booking = services.change_booking_status(
                 booking=booking, new_status=data["status"], actor=request.user,
                 reason=data.get("reason", ""),

@@ -6,7 +6,7 @@ import datetime as dt
 import pytest
 
 from bookings.services import create_booking
-from common.enums import PaymentStatus
+from common.enums import BookingStatus, PaymentStatus
 from common.utils import local_now
 from futsal.models import Slot
 
@@ -52,7 +52,7 @@ def test_cron_accepts_correct_secret(api, settings):
     settings.CRON_SECRET = "s3cret"
     response = api.get(URL, HTTP_AUTHORIZATION="Bearer s3cret")
     assert response.status_code == 200
-    assert response.data["data"] == {"sent": 0, "failed": 0}
+    assert response.data["data"] == {"sent": 0, "failed": 0, "completed": 0}
 
 
 def test_cron_fails_closed_when_no_secret_configured(api, settings):
@@ -70,3 +70,18 @@ def test_cron_sends_due_reminder_and_dedups(api, settings, booking_in_one_hour):
     assert len(mail.outbox) == 1
     second = api.get(URL, HTTP_AUTHORIZATION="Bearer s3cret")
     assert second.data["data"]["sent"] == 0
+
+
+def test_cron_completes_bookings_after_their_slot_ends(api, settings, booking_in_one_hour):
+    settings.CRON_SECRET = "s3cret"
+    ended_at = booking_in_one_hour.slot.end_datetime + dt.timedelta(minutes=1)
+
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        monkeypatch.setattr("bookings.services.local_now", lambda: ended_at)
+        response = api.get(URL, HTTP_AUTHORIZATION="Bearer s3cret")
+
+    assert response.status_code == 200
+    assert response.data["data"]["completed"] == 1
+    booking_in_one_hour.refresh_from_db()
+    assert booking_in_one_hour.status == BookingStatus.COMPLETED
+    assert booking_in_one_hour.payment.payment_status == PaymentStatus.PAID
