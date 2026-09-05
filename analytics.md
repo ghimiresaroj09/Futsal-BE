@@ -144,6 +144,37 @@ GET /api/v1/analytics/?period=6m&timezone=Asia%2FKathmandu
         "percentage": 30.4
       }
     ],
+    "revenue_by_payment_method": [
+      {
+        "method": "CASH",
+        "label": "Cash",
+        "revenue": "1520000.00",
+        "booking_count": 690,
+        "percentage": 53.4
+      }
+    ],
+    "payment_status": {
+      "total": 1284,
+      "breakdown": [
+        {"status": "PAID", "label": "Paid", "count": 1091, "amount": "2418000.00"}
+      ]
+    },
+    "bookings_by_time": [
+      {"start_time": "18:00:00", "end_time": "19:00:00", "booking_count": 226, "revenue": "501000.00"}
+    ],
+    "capacity": {
+      "total_slots": 1500,
+      "booked_slots": 1156,
+      "available_slots": 282,
+      "blocked_slots": 62,
+      "occupancy_percent": 77.1
+    },
+    "booking_performance": {
+      "cancelled_bookings": 128,
+      "completed_bookings": 347,
+      "cancellation_rate_percent": 10.0,
+      "completion_rate_percent": 30.0
+    },
     "generated_at": "2026-09-05T12:30:00+05:45"
   }
 }
@@ -201,6 +232,14 @@ The booking source values are:
 
 Return both revenue and booking count so the frontend can show a source comparison and percentages.
 
+### Additional operational metrics
+
+- `revenue_by_payment_method`: Paid revenue and paid booking count for every supported payment method. Zero-value methods are included for stable chart legends.
+- `payment_status`: Payment count and recorded amount for every payment status. The `amount` is the booking amount, not necessarily collected revenue; use `revenue_by_payment_method` or `summary.total_revenue` for paid revenue.
+- `bookings_by_time`: Paid booking count and revenue grouped by slot start/end time, ordered by start time. This supports peak-time analysis.
+- `capacity`: Slot availability in the selected date range. `occupancy_percent` is `booked_slots / total_slots`.
+- `booking_performance`: Cancellation and completion counts and rates. Completion rate excludes cancelled bookings from its denominator.
+
 ## Endpoint availability
 
 Only the aggregate endpoint is provided. It accepts all filters described above and is the endpoint the current UI should use.
@@ -247,4 +286,9 @@ Recommended HTTP statuses:
 | Booking status donut | `data.booking_status.breakdown` |
 | Bookings by day chart | `data.bookings_by_day` |
 | Revenue by source | `data.revenue_by_source` |
+| Revenue by payment method | `data.revenue_by_payment_method` |
+| Payment status | `data.payment_status.breakdown` |
+| Peak times | `data.bookings_by_time` |
+| Capacity / occupancy | `data.capacity` |
+| Cancellation / completion | `data.booking_performance` |
 | Period selector | `data.period` |

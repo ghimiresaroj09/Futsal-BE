@@ -9,7 +9,9 @@ from django.db.models.functions import Coalesce, TruncMonth
 from django.utils import timezone
 
 from bookings.models import Booking
-from common.enums import BookingSource, BookingStatus, PaymentStatus, SlotStatus
+from common.enums import (
+    BookingSource, BookingStatus, PaymentMethod, PaymentStatus, SlotStatus,
+)
 from futsal.models import FutsalClosure, Slot
 from payments.models import Payment
 
@@ -85,6 +87,10 @@ def analytics(start: dt.date, end: dt.date, *, period: str, futsal_id=None) -> d
         booking_filters &= Q(futsal_id=futsal_id)
         payment_filters &= Q(booking__futsal_id=futsal_id)
     bookings, payments = Booking.objects.filter(booking_filters), Payment.objects.filter(payment_filters)
+    slot_filters = Q(date__gte=start, date__lte=end)
+    if futsal_id:
+        slot_filters &= Q(futsal_id=futsal_id)
+    slots = Slot.objects.filter(slot_filters)
     revenue = payments.aggregate(total=Coalesce(Sum("amount"), ZERO))["total"]
     booking_count, revenue_booking_count = bookings.count(), payments.count()
     average = revenue / revenue_booking_count if revenue_booking_count else ZERO
@@ -112,6 +118,52 @@ def analytics(start: dt.date, end: dt.date, *, period: str, futsal_id=None) -> d
     overview = [{"period": row["bucket"].isoformat() if truncate is None else row["bucket"].strftime("%Y-%m"), "label": row["bucket"].strftime("%d %b") if truncate is None else row["bucket"].strftime("%b"), "revenue": row["revenue"], "booking_count": row["booking_count"]} for row in rows]
     source_rows = {row["booking__booking_source"]: row for row in payments.values("booking__booking_source").annotate(revenue=Coalesce(Sum("amount"), ZERO), booking_count=Count("id"))}
     sources = [{"source": source, "label": "User bookings" if source == BookingSource.USER else "Admin bookings", "revenue": source_rows.get(source, {}).get("revenue", ZERO), "booking_count": source_rows.get(source, {}).get("booking_count", 0), "percentage": round(float(source_rows.get(source, {}).get("revenue", ZERO) / revenue * 100), 1) if revenue else 0} for source, _ in BookingSource.choices]
+    payment_status_rows = {
+        row["payment_status"]: row
+        for row in Payment.objects.filter(
+            Q(booking__slot__date__gte=start, booking__slot__date__lte=end)
+            & (Q(booking__futsal_id=futsal_id) if futsal_id else Q())
+        ).values("payment_status").annotate(count=Count("id"), amount=Coalesce(Sum("amount"), ZERO))
+    }
+    payment_status = {
+        "total": sum(row["count"] for row in payment_status_rows.values()),
+        "breakdown": [
+            {"status": status, "label": label,
+             "count": payment_status_rows.get(status, {}).get("count", 0),
+             "amount": payment_status_rows.get(status, {}).get("amount", ZERO)}
+            for status, label in PaymentStatus.choices
+        ],
+    }
+    method_rows = {
+        row["payment_method"]: row
+        for row in payments.values("payment_method").annotate(
+            revenue=Coalesce(Sum("amount"), ZERO), booking_count=Count("id")
+        )
+    }
+    revenue_by_payment_method = [
+        {"method": method, "label": label,
+         "revenue": method_rows.get(method, {}).get("revenue", ZERO),
+         "booking_count": method_rows.get(method, {}).get("booking_count", 0),
+         "percentage": round(float(method_rows.get(method, {}).get("revenue", ZERO) / revenue * 100), 1) if revenue else 0}
+        for method, label in PaymentMethod.choices
+    ]
+    time_rows = {
+        row["booking__slot__start_time"]: row
+        for row in payments.values("booking__slot__start_time", "booking__slot__end_time").annotate(
+            revenue=Coalesce(Sum("amount"), ZERO), booking_count=Count("id")
+        )
+    }
+    booking_times = [
+        {"start_time": start_time, "end_time": row["booking__slot__end_time"],
+         "booking_count": row["booking_count"], "revenue": row["revenue"]}
+        for start_time, row in sorted(time_rows.items())
+    ]
+    slot_counts = dict(slots.values("status").annotate(count=Count("id")).values_list("status", "count"))
+    total_slots = slots.count()
+    booked_slots = slot_counts.get(SlotStatus.BOOKED, 0)
+    cancelled_count = status_counts.get(BookingStatus.CANCELLED, 0)
+    completed_count = status_counts.get(BookingStatus.COMPLETED, 0)
+    non_cancelled_bookings = booking_count - cancelled_count
     active_customers = bookings.exclude(user__isnull=True).values("user_id").distinct().count()
     previous_customers = previous_bookings.exclude(user__isnull=True).values("user_id").distinct().count()
     return {
@@ -120,5 +172,21 @@ def analytics(start: dt.date, end: dt.date, *, period: str, futsal_id=None) -> d
         "booking_status": {"total": booking_count, "breakdown": breakdown},
         "bookings_by_day": [{"day": day, "label": label, "booking_count": by_day.get(index, 0)} for index, (day, label) in enumerate(weekdays)],
         "revenue_by_source": sources,
+        "revenue_by_payment_method": revenue_by_payment_method,
+        "payment_status": payment_status,
+        "bookings_by_time": booking_times,
+        "capacity": {
+            "total_slots": total_slots,
+            "booked_slots": booked_slots,
+            "available_slots": slot_counts.get(SlotStatus.AVAILABLE, 0),
+            "blocked_slots": slot_counts.get(SlotStatus.BLOCKED, 0),
+            "occupancy_percent": round(booked_slots / total_slots * 100, 1) if total_slots else 0,
+        },
+        "booking_performance": {
+            "cancelled_bookings": cancelled_count,
+            "completed_bookings": completed_count,
+            "cancellation_rate_percent": round(cancelled_count / booking_count * 100, 1) if booking_count else 0,
+            "completion_rate_percent": round(completed_count / non_cancelled_bookings * 100, 1) if non_cancelled_bookings else 0,
+        },
         "generated_at": timezone.now(),
     }
