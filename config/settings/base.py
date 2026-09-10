@@ -42,6 +42,7 @@ LOCAL_APPS = [
     "notifications",
     "dashboard",
     "contact",
+    "cms.apps.CmsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -228,6 +229,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "admin-contact", "description": "Contact message triage"},
         {"name": "admin-reminders", "description": "Reminder history and manual sending"},
         {"name": "admin-media", "description": "Futsal image/video uploads (Cloudinary)"},
+        {"name": "cms", "description": "Content Management System for static pages (Homepage, Bookings, Gallery, About, Contact)"},
         {"name": "internal", "description": "Internal cron/scheduler endpoints"},
     ],
 }
