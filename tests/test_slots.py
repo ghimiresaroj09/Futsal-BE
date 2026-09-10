@@ -130,10 +130,9 @@ def test_admin_can_update_slot(admin_client, slot):
 def test_admin_can_delete_slot(admin_client, slot):
     response = admin_client.delete(f"{ADMIN_SLOTS}{slot.id}/")
     assert response.status_code == 200
-    assert response.data == {
-        "success": True,
-        "message": "Slot deleted successfully",
-    }
+    assert response.data["success"] is True
+    assert response.data["message"] == "Slot deleted successfully."
+    assert "id" in response.data["data"]
     assert not Slot.objects.filter(pk=slot.pk).exists()
 
 

@@ -107,7 +107,7 @@ class PublicSlotViewSet(EnvelopeMixin, viewsets.ReadOnlyModelViewSet):
         serializer.is_valid(raise_exception=True)
         queryset = self.get_queryset().filter(date=serializer.validated_data["date"])
         page = self.paginate_queryset(queryset)
-        return self.get_paginated_response(SlotSerializer(page, many=True).data)
+        return self.get_paginated_response(SlotSerializer(page, many=True, context={'request': request}).data)
 
 
 @extend_schema(tags=["admin-slots"])
