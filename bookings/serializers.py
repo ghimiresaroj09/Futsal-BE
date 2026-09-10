@@ -8,10 +8,35 @@ from bookings.models import Booking
 from common.enums import BookingStatus, PaymentMethod
 from common.validators import validate_full_name, validate_phone_number
 from futsal.serializers import SlotSerializer
+from futsal.models import Slot
+
+
+class BookingSlotSerializer(serializers.ModelSerializer):
+    """Slot serializer for booking responses that shows RESERVED for pending bookings."""
+    
+    price = serializers.DecimalField(source="effective_price", max_digits=10,
+                                     decimal_places=2, read_only=True)
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Slot
+        fields = ["id", "date", "start_time", "end_time", "price", "status",
+                  "created_at", "updated_at"]
+        read_only_fields = fields
+
+    def get_status(self, obj):
+        """
+        Return 'RESERVED' if the parent booking is PENDING, otherwise return actual slot status.
+        """
+        # Get the parent booking from context
+        booking = self.context.get('booking')
+        if booking and booking.status == BookingStatus.PENDING:
+            return "RESERVED"
+        return obj.status
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    slot = SlotSerializer(read_only=True)
+    slot = serializers.SerializerMethodField()
     futsal_name = serializers.CharField(source="futsal.name", read_only=True)
     payment_status = serializers.CharField(source="payment.payment_status", read_only=True,
                                            default=None)
@@ -31,6 +56,10 @@ class BookingSerializer(serializers.ModelSerializer):
             "cancelled_at", "cancellation_reason", "notes", "created_at", "updated_at",
         ]
         read_only_fields = fields
+
+    def get_slot(self, obj):
+        """Serialize the slot with booking context to show RESERVED status for pending bookings."""
+        return BookingSlotSerializer(obj.slot, context={'booking': obj}).data
 
 
 class BookingCreateSerializer(serializers.Serializer):
