@@ -46,8 +46,8 @@ def test_pending_booking_shows_reserved_for_users(api, user_client, futsal, user
     assert results[0]["status"] == "RESERVED"
 
 
-def test_pending_booking_shows_normal_status_for_admin(admin_client, futsal, user):
-    """Admin users should see the actual slot status even for pending bookings."""
+def test_pending_booking_shows_reserved_for_admin(admin_client, futsal, user):
+    """Admin users should also see RESERVED status for pending bookings."""
     # Create a slot
     target_date = local_today() + dt.timedelta(days=2)
     slot = Slot.objects.create(
@@ -71,12 +71,12 @@ def test_pending_booking_shows_normal_status_for_admin(admin_client, futsal, use
         status=BookingStatus.PENDING
     )
     
-    # Admin should see BOOKED (actual status)
+    # Admin should also see RESERVED (same as public users)
     response = admin_client.get(f"{PUBLIC_SLOTS}?date={target_date.isoformat()}")
     assert response.status_code == 200
     results = response.data["data"]["results"]
     assert len(results) == 1
-    assert results[0]["status"] == SlotStatus.BOOKED
+    assert results[0]["status"] == "RESERVED"
 
 
 def test_confirmed_booking_shows_booked_for_users(user_client, futsal, user):
