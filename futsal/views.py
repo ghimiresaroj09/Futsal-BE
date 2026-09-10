@@ -78,6 +78,7 @@ class AdminFutsalView(GenericAPIView):
         tags=["slots"],
         parameters=[OpenApiParameter("date", str, description="Filter by date (YYYY-MM-DD)")],
         summary="List upcoming slots date-wise",
+        description="Returns upcoming slots. If a specific date is provided and that date is closed, returns closure information.",
         auth=[],
     ),
     retrieve=extend_schema(tags=["slots"], summary="Retrieve a slot", auth=[]),
@@ -93,6 +94,34 @@ class PublicSlotViewSet(EnvelopeMixin, viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return slots_queryset().upcoming()
+    
+    def list(self, request, *args, **kwargs):
+        """Override list to check for closures when filtering by date."""
+        # Check if filtering by a specific date
+        date_param = request.query_params.get('date')
+        if date_param:
+            try:
+                from datetime import datetime
+                target_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+                
+                # Check if the date is closed
+                closure = FutsalClosure.objects.covering(target_date).first()
+                if closure:
+                    return success_response(
+                        data={
+                            "date": str(target_date),
+                            "is_closed": True,
+                            "reason": closure.reason or "Facility closed",
+                            "results": []
+                        },
+                        message=f"Facility is closed on {target_date}. {closure.reason or 'No bookings available.'}",
+                        status=status.HTTP_200_OK
+                    )
+            except (ValueError, TypeError):
+                pass  # Invalid date format, let the filterset handle validation
+        
+        # Normal list response
+        return super().list(request, *args, **kwargs)
 
     @extend_schema(
         tags=["slots"],
@@ -105,7 +134,23 @@ class PublicSlotViewSet(EnvelopeMixin, viewsets.ReadOnlyModelViewSet):
     def date_wise(self, request):
         serializer = SlotDateSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-        queryset = self.get_queryset().filter(date=serializer.validated_data["date"])
+        target_date = serializer.validated_data["date"]
+        
+        # Check if the date is closed
+        closure = FutsalClosure.objects.covering(target_date).first()
+        if closure:
+            return success_response(
+                data={
+                    "date": str(target_date),
+                    "is_closed": True,
+                    "reason": closure.reason or "Facility closed",
+                    "slots": []
+                },
+                message=f"Facility is closed on {target_date}. {closure.reason or 'No bookings available.'}",
+                status=status.HTTP_200_OK
+            )
+        
+        queryset = self.get_queryset().filter(date=target_date)
         page = self.paginate_queryset(queryset)
         return self.get_paginated_response(SlotSerializer(page, many=True, context={'request': request}).data)
 
