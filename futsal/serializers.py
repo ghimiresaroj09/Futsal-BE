@@ -191,25 +191,12 @@ class SlotSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         """
-        Return 'Reserved' for non-admin users when a slot has a PENDING booking.
-        Admins see the actual slot status.
+        Return 'RESERVED' when a slot has a PENDING booking.
+        This applies to both admin and public endpoints.
         """
-        from common.enums import UserRole, BookingStatus
+        from common.enums import BookingStatus
         
-        # Check if user is admin
-        request = self.context.get('request')
-        is_admin = (
-            request and 
-            request.user and 
-            request.user.is_authenticated and 
-            request.user.role == UserRole.ADMIN
-        )
-        
-        # Admin users see the actual status
-        if is_admin:
-            return obj.status
-        
-        # For non-admin users, check if there's a pending booking
+        # Check if there's a pending booking
         if hasattr(obj, 'active_bookings'):
             pending_bookings = [
                 booking for booking in obj.active_bookings 
@@ -218,7 +205,7 @@ class SlotSerializer(serializers.ModelSerializer):
             if pending_bookings:
                 return "RESERVED"
         
-        # Otherwise return the actual status
+        # Otherwise return the actual slot status
         return obj.status
 
 
