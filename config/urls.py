@@ -28,6 +28,7 @@ api_v1 = [
     path("futsal/", FutsalDetailView.as_view(), name="futsal"),
     path("analytics/", AnalyticsView.as_view(), name="analytics"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
+    path("cms/", include("cms.urls")),
     path("admin/", include("config.admin_urls")),
     path("internal/cron/reminders/", CronReminderView.as_view(), name="cron-reminders"),
     path("", include(router.urls)),
