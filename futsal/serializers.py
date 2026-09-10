@@ -180,12 +180,46 @@ class SlotSerializer(serializers.ModelSerializer):
 
     price = serializers.DecimalField(source="effective_price", max_digits=10,
                                      decimal_places=2, read_only=True)
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Slot
         fields = ["id", "date", "start_time", "end_time", "price", "status",
                   "created_at", "updated_at"]
-        read_only_fields = fields
+        read_only_fields = ["id", "date", "start_time", "end_time", "price",
+                           "created_at", "updated_at"]
+
+    def get_status(self, obj):
+        """
+        Return 'Reserved' for non-admin users when a slot has a PENDING booking.
+        Admins see the actual slot status.
+        """
+        from common.enums import UserRole, BookingStatus
+        
+        # Check if user is admin
+        request = self.context.get('request')
+        is_admin = (
+            request and 
+            request.user and 
+            request.user.is_authenticated and 
+            request.user.role == UserRole.ADMIN
+        )
+        
+        # Admin users see the actual status
+        if is_admin:
+            return obj.status
+        
+        # For non-admin users, check if there's a pending booking
+        if hasattr(obj, 'active_bookings'):
+            pending_bookings = [
+                booking for booking in obj.active_bookings 
+                if booking.status == BookingStatus.PENDING
+            ]
+            if pending_bookings:
+                return "RESERVED"
+        
+        # Otherwise return the actual status
+        return obj.status
 
 
 class SlotWriteSerializer(serializers.ModelSerializer):
