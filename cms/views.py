@@ -689,7 +689,8 @@ class GalleryHighlightViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     
     @extend_schema(
         summary="Upload gallery highlight video",
-        description="Upload a new highlight video to Cloudinary. Admin only.",
+        description="Upload a new highlight video to Cloudinary. Admin only. Tags is a plain text field (e.g., 'goal, highlight, tournament')",
+        request=GalleryHighlightUploadSerializer,
         responses={201: GalleryHighlightSerializer}
     )
     def create(self, request, *args, **kwargs):

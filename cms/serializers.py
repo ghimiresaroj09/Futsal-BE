@@ -506,30 +506,10 @@ class GalleryHighlightUploadSerializer(serializers.ModelSerializer):
         return value.strip()
     
     def validate_tags(self, value):
-        """Validate tags is a list of strings."""
-        # Handle both JSON string (from multipart/form-data) and list (from JSON)
-        if isinstance(value, str):
-            import json
-            try:
-                value = json.loads(value)
-            except json.JSONDecodeError:
-                raise serializers.ValidationError("Value must be valid JSON.")
-        
-        if value is not None:
-            if not isinstance(value, list):
-                raise serializers.ValidationError("Tags must be an array.")
-            
-            for idx, tag in enumerate(value):
-                if not isinstance(tag, str):
-                    raise serializers.ValidationError(
-                        f"Tag at index {idx} must be a string."
-                    )
-                if not tag.strip():
-                    raise serializers.ValidationError(
-                        "Tags cannot contain empty strings."
-                    )
-        
-        return value
+        """Validate and clean tags."""
+        if value:
+            return value.strip()
+        return ""
     
     def validate_sort_order(self, value):
         """Validate sort order is not negative."""

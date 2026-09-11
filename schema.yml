@@ -2335,7 +2335,8 @@ paths:
           description: ''
     post:
       operationId: cms_gallery_highlights_create
-      description: Upload a new highlight video to Cloudinary. Admin only.
+      description: Upload a new highlight video to Cloudinary. Admin only. Tags is
+        a plain text field (e.g., 'goal, highlight, tournament')
       summary: Upload gallery highlight video
       tags:
       - cms
@@ -4659,7 +4660,8 @@ components:
           type: string
           readOnly: true
         tags:
-          description: Array of tag strings (e.g., ['goal', 'save', 'skills'])
+          type: string
+          description: Tags for the video (e.g., 'goal, save, skills')
         is_active:
           type: boolean
           description: Show on website
@@ -4701,7 +4703,8 @@ components:
           nullable: true
           description: Video thumbnail (optional)
         tags:
-          description: Array of tag strings (e.g., ['goal', 'save', 'skills'])
+          type: string
+          description: Tags for the video (e.g., 'goal, save, skills')
         is_active:
           type: boolean
           description: Show on website
@@ -4732,7 +4735,8 @@ components:
           nullable: true
           description: Video thumbnail (optional)
         tags:
-          description: Array of tag strings (e.g., ['goal', 'save', 'skills'])
+          type: string
+          description: Tags for the video (e.g., 'goal, save, skills')
         is_active:
           type: boolean
           description: Show on website
@@ -5451,7 +5455,8 @@ components:
           nullable: true
           description: Video thumbnail (optional)
         tags:
-          description: Array of tag strings (e.g., ['goal', 'save', 'skills'])
+          type: string
+          description: Tags for the video (e.g., 'goal, save, skills')
         is_active:
           type: boolean
           description: Show on website

@@ -20,7 +20,7 @@ The Gallery Highlights API allows you to manage video highlights for the futsal 
 | `title` | String | Yes | Video title (max 200 chars) |
 | `video` | File | Yes | Video file (uploaded to Cloudinary at `highlights/`) |
 | `thumbnail` | Image | No | Optional video thumbnail (uploaded to `highlights/thumbnails/`) |
-| `tags` | Array[String] | No | Array of tag strings (e.g., `["goal", "save", "skills"]`) |
+| `tags` | String | No | Tags as text (e.g., "goal, save, skills") |
 | `is_active` | Boolean | No | Show on website (default: `true`) |
 | `sort_order` | Integer | No | Display order (default: `0`, non-negative) |
 | `created_at` | DateTime | Auto | Creation timestamp |
@@ -57,7 +57,7 @@ Returns all active highlights. Admins see all highlights including inactive ones
         "title": "Amazing Goal Compilation",
         "video_url": "https://res.cloudinary.com/.../highlights/video.mp4",
         "thumbnail_url": "https://res.cloudinary.com/.../highlights/thumbnails/thumb.jpg",
-        "tags": ["goal", "skills", "tournament"],
+        "tags": "goal, skills, tournament",
         "is_active": true,
         "sort_order": 0,
         "created_at": "2026-09-10T10:30:00Z",
@@ -85,18 +85,14 @@ Upload a new highlight video. **Admin only**.
 title: Amazing Goal Compilation
 video: [video file]
 thumbnail: [image file] (optional)
-tags: ["goal", "skills", "tournament"]  ← Must be JSON string
+tags: goal, highlight, tournament
 is_active: true
 sort_order: 0
 ```
 
-**Important**: The `tags` field must be a JSON-formatted string when using multipart/form-data:
-- ✅ Correct: `["goal", "skills"]`
-- ❌ Wrong: `goal,skills`
-
 **Example in Swagger UI**:
 ```
-tags: ["goal", "highlight", "tournament"]
+tags: goal, highlight, tournament
 ```
 
 **Response:** `201 Created`
@@ -109,7 +105,7 @@ tags: ["goal", "highlight", "tournament"]
     "title": "Amazing Goal Compilation",
     "video_url": "https://res.cloudinary.com/.../highlights/video.mp4",
     "thumbnail_url": "https://res.cloudinary.com/.../highlights/thumbnails/thumb.jpg",
-    "tags": ["goal", "skills", "tournament"],
+    "tags": "goal, skills, tournament",
     "is_active": true,
     "sort_order": 0,
     "created_at": "2026-09-10T10:30:00Z",
@@ -121,7 +117,7 @@ tags: ["goal", "highlight", "tournament"]
 **Validation Rules:**
 - `title`: Cannot be empty
 - `video`: Required on creation
-- `tags`: Must be array of non-empty strings
+- `tags`: Plain text string, can be empty
 - `sort_order`: Cannot be negative
 
 **Error Response:** `400 Bad Request`
@@ -131,7 +127,6 @@ tags: ["goal", "highlight", "tournament"]
   "message": "Validation failed",
   "errors": {
     "title": ["Title cannot be empty."],
-    "tags": ["Tags must be an array."],
     "sort_order": ["Sort order cannot be negative."]
   }
 }
@@ -259,33 +254,9 @@ curl -X POST "http://localhost:8000/api/v1/cms/gallery/highlights/" \
   -F "title=Best Saves 2026" \
   -F "video=@saves.mp4" \
   -F "thumbnail=@saves_thumb.jpg" \
-  -F 'tags=["save", "goalkeeper", "2026"]' \
+  -F "tags=save, goalkeeper, 2026" \
   -F "is_active=true" \
   -F "sort_order=0"
-```
-
-**Important**: When using multipart/form-data, the `tags` field must be a JSON string:
-- ✅ Correct: `'tags=["save", "goalkeeper"]'`
-- ❌ Wrong: `'tags=save,goalkeeper'`
-
-### Example 1b: Upload Highlight with Tags (JSON)
-```bash
-curl -X POST "http://localhost:8000/api/v1/cms/gallery/highlights/" \
-  -H "Authorization: Bearer {admin_token}" \
-  -H "Content-Type: multipart/form-data" \
-  -F "title=Best Saves 2026" \
-  -F "video=@saves.mp4" \
-  -F 'tags=["save", "goalkeeper", "2026"]'
-```
-
-When using JSON (not multipart), tags is a direct array:
-```bash
-curl -X PATCH "http://localhost:8000/api/v1/cms/gallery/highlights/{id}/" \
-  -H "Authorization: Bearer {admin_token}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tags": ["save", "goalkeeper", "2026"]
-  }'
 ```
 
 ### Example 2: Filter Active Highlights
@@ -304,7 +275,7 @@ curl -X PATCH "http://localhost:8000/api/v1/cms/gallery/highlights/{id}/" \
   -H "Authorization: Bearer {admin_token}" \
   -H "Content-Type: application/json" \
   -d '{
-    "tags": ["goal", "highlight", "featured"]
+    "tags": "goal, highlight, featured"
   }'
 ```
 
@@ -348,7 +319,7 @@ const formData = new FormData();
 formData.append('title', 'New Highlight');
 formData.append('video', videoFile);
 formData.append('thumbnail', thumbnailFile);
-formData.append('tags', JSON.stringify(['goal', 'tournament']));
+formData.append('tags', 'goal, tournament');
 formData.append('is_active', 'true');
 
 const response = await fetch('/api/v1/cms/gallery/highlights/', {
@@ -392,7 +363,7 @@ Gallery highlights are manageable via Django Admin at `/admin/cms/galleryhighlig
 ## Technical Notes
 
 1. **Video Format Support**: Cloudinary supports MP4, WebM, OGG, MOV, and other common video formats
-2. **Tags Implementation**: Stored as JSONField array, validated to contain only non-empty strings
+2. **Tags Implementation**: Stored as TextField (plain text string)
 3. **Thumbnail Optional**: Videos can be uploaded without thumbnails; Cloudinary can auto-generate if needed
 4. **No Category**: Unlike gallery images, highlights use tags instead of categories for flexible filtering
 5. **Ordering**: Default order is `sort_order` ascending, then `created_at` descending (newest first)
@@ -444,7 +415,7 @@ CREATE INDEX idx_highlight_active_sort ON cms_gallery_highlight(is_active, sort_
 - [ ] List all highlights (public - active only)
 - [ ] List all highlights (admin - including inactive)
 - [ ] Search by title
-- [ ] Search by tag
+- [ ] Search by tag text
 - [ ] Filter by is_active
 - [ ] Update title and tags
 - [ ] Replace video file
@@ -452,8 +423,7 @@ CREATE INDEX idx_highlight_active_sort ON cms_gallery_highlight(is_active, sort_
 - [ ] Deactivate highlight
 - [ ] Delete highlight
 - [ ] Verify Cloudinary paths correct
-- [ ] Test tag validation (must be array of strings)
-- [ ] Test empty tag rejection
+- [ ] Test tags as plain text
 - [ ] Test negative sort_order rejection
 
 ---

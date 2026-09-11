@@ -5,6 +5,7 @@ from django.db import models
 from solo.models import SingletonModel
 
 from common.models import BaseModel
+from common.storages import image_storage, video_storage
 
 
 class HeroSection(SingletonModel):
@@ -206,15 +207,17 @@ class GalleryHighlight(BaseModel):
     )
     video = models.FileField(
         upload_to="highlights/",
+        storage=video_storage,
         help_text="Highlight video (Cloudinary)"
     )
-    tags = models.JSONField(
-        default=list,
+    tags = models.TextField(
         blank=True,
-        help_text="Array of tag strings (e.g., ['goal', 'save', 'skills'])"
+        default="",
+        help_text="Tags for the video (e.g., 'goal, save, skills')"
     )
     thumbnail = models.ImageField(
         upload_to="highlights/thumbnails/",
+        storage=image_storage,
         null=True,
         blank=True,
         help_text="Video thumbnail (optional)"
