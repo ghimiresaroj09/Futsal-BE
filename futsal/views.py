@@ -247,15 +247,24 @@ class AdminSlotViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     def generate(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        created = generate_slots_for_range(
-            start_date=serializer.validated_data["start_date"],
-            end_date=serializer.validated_data["end_date"],
-        )
-        return success_response(
-            data={"created": len(created), "slots": SlotSerializer(created, many=True).data},
-            message=f"{len(created)} slot(s) generated successfully.",
-            status=status.HTTP_201_CREATED,
-        )
+        
+        try:
+            created = generate_slots_for_range(
+                start_date=serializer.validated_data["start_date"],
+                end_date=serializer.validated_data["end_date"],
+            )
+            return success_response(
+                data={"created": len(created), "slots": SlotSerializer(created, many=True).data},
+                message=f"{len(created)} slot(s) generated successfully.",
+                status=status.HTTP_201_CREATED,
+            )
+        except ValueError as e:
+            # Handle configuration errors (e.g., missing opening/closing times)
+            return success_response(
+                data={"created": 0, "slots": []},
+                message=str(e),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @extend_schema(
         tags=["admin-slots"],
