@@ -29,6 +29,7 @@ api_v1 = [
     path("analytics/", AnalyticsView.as_view(), name="analytics"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("admin/", include("config.admin_urls")),
+    path("cms/", include("cms.urls")),
     path("internal/cron/reminders/", CronReminderView.as_view(), name="cron-reminders"),
     path("", include(router.urls)),
 ]

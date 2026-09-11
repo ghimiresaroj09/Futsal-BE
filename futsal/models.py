@@ -4,7 +4,7 @@ from __future__ import annotations
 import datetime as dt
 
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, URLValidator
 from django.db import models
 
 from common.enums import FutsalStatus, SlotStatus
@@ -54,6 +54,32 @@ class Futsal(BaseModel):
     closing_time = models.TimeField()
     status = models.CharField(
         max_length=10, choices=FutsalStatus.choices, default=FutsalStatus.ACTIVE, db_index=True
+    )
+    
+    # Social Media Links
+    facebook = models.URLField(
+        blank=True,
+        default="",
+        validators=[URLValidator()],
+        help_text="Facebook page URL"
+    )
+    instagram = models.URLField(
+        blank=True,
+        default="",
+        validators=[URLValidator()],
+        help_text="Instagram profile URL"
+    )
+    twitter = models.URLField(
+        blank=True,
+        default="",
+        validators=[URLValidator()],
+        help_text="Twitter/X profile URL"
+    )
+    tiktok = models.URLField(
+        blank=True,
+        default="",
+        validators=[URLValidator()],
+        help_text="TikTok profile URL"
     )
 
     objects = FutsalManager()
@@ -245,3 +271,5 @@ class FutsalMedia(BaseModel):
     @property
     def url(self) -> str | None:
         return self.file.url if self.file else None
+
+

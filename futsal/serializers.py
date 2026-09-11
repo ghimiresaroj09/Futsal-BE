@@ -161,9 +161,34 @@ class FutsalSerializer(serializers.ModelSerializer):
         fields = [
             "id", "name", "description", "location", "address", "phone", "email",
             "price_per_slot", "slot_duration", "opening_time", "closing_time", "status",
+            "facebook", "instagram", "twitter", "tiktok",
             "created_at", "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_facebook(self, value):
+        """Validate Facebook URL format."""
+        if value and not any(domain in value for domain in ["facebook.com", "fb.com"]):
+            raise serializers.ValidationError("Please provide a valid Facebook URL.")
+        return value
+    
+    def validate_instagram(self, value):
+        """Validate Instagram URL format."""
+        if value and "instagram.com" not in value:
+            raise serializers.ValidationError("Please provide a valid Instagram URL.")
+        return value
+    
+    def validate_twitter(self, value):
+        """Validate Twitter/X URL format."""
+        if value and not any(domain in value for domain in ["twitter.com", "x.com"]):
+            raise serializers.ValidationError("Please provide a valid Twitter/X URL.")
+        return value
+    
+    def validate_tiktok(self, value):
+        """Validate TikTok URL format."""
+        if value and "tiktok.com" not in value:
+            raise serializers.ValidationError("Please provide a valid TikTok URL.")
+        return value
 
     def validate(self, attrs):
         opening = attrs.get("opening_time", getattr(self.instance, "opening_time", None))
