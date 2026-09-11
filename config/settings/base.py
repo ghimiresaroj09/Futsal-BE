@@ -31,6 +31,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "cloudinary_storage",
     "cloudinary",
+    "solo",
 ]
 
 LOCAL_APPS = [
@@ -42,6 +43,7 @@ LOCAL_APPS = [
     "notifications",
     "dashboard",
     "contact",
+    "cms",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -218,6 +220,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "slots", "description": "Date-wise slot availability (read-only)"},
         {"name": "bookings", "description": "User bookings, cancel and reschedule"},
         {"name": "contact", "description": "Contact us"},
+        {"name": "testimonials", "description": "Customer testimonials and reviews"},
         {"name": "admin-profile", "description": "Admin profile and password"},
         {"name": "admin-futsal", "description": "Futsal configuration (pricing, hours)"},
         {"name": "admin-slots", "description": "Slot management and bulk generation"},

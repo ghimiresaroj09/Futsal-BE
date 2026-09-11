@@ -7,6 +7,25 @@ from futsal.models import Futsal, FutsalClosure, FutsalMedia, Slot
 class FutsalAdmin(admin.ModelAdmin):
     list_display = ["name", "location", "price_per_slot", "status"]
     search_fields = ["name", "location"]
+    
+    fieldsets = (
+        ("Basic Information", {
+            "fields": ("name", "description", "location", "address", "phone", "email", "status")
+        }),
+        ("Pricing & Schedule", {
+            "fields": ("price_per_slot", "slot_duration", "opening_time", "closing_time")
+        }),
+        ("Social Media", {
+            "fields": ("facebook", "instagram", "twitter", "tiktok"),
+            "classes": ("collapse",)
+        }),
+        ("Metadata", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",)
+        }),
+    )
+    
+    readonly_fields = ["created_at", "updated_at"]
 
 
 @admin.register(Slot)

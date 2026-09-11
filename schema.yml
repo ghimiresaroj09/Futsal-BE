@@ -1,0 +1,6344 @@
+openapi: 3.0.3
+info:
+  title: Futsal Management System API
+  version: 1.0.0
+  description: REST API for futsal venue, slot, booking, payment and reminder management.
+paths:
+  /api/v1/admin/bookings/:
+    get:
+      operationId: admin_bookings_list
+      description: Full booking management for admins.
+      parameters:
+      - in: query
+        name: booking_reference
+        schema:
+          type: string
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: futsal
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: phone
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: source
+        schema:
+          type: string
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - admin-bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+          description: ''
+    post:
+      operationId: admin_bookings_create
+      description: Full booking management for admins.
+      summary: Admin creates a booking on behalf of a customer
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Filter by slot date
+      tags:
+      - admin-bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminBookingCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminBookingCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminBookingCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBookingCreate'
+          description: ''
+  /api/v1/admin/bookings/{id}/:
+    get:
+      operationId: admin_bookings_retrieve
+      description: Full booking management for admins.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - admin-bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+    put:
+      operationId: admin_bookings_update
+      description: Full booking management for admins.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - admin-bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminBookingUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminBookingUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminBookingUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBookingUpdate'
+          description: ''
+    patch:
+      operationId: admin_bookings_partial_update
+      description: Full booking management for admins.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - admin-bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminBookingUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminBookingUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminBookingUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminBookingUpdate'
+          description: ''
+    delete:
+      operationId: admin_bookings_destroy
+      description: Full booking management for admins.
+      summary: Cancel a booking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - admin-bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDeleteResponse'
+          description: ''
+  /api/v1/admin/bookings/{id}/cancel/:
+    post:
+      operationId: admin_bookings_cancel_create
+      description: Full booking management for admins.
+      summary: Cancel a booking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - admin-bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/admin/bookings/{id}/complete/:
+    post:
+      operationId: admin_bookings_complete_create
+      description: Full booking management for admins.
+      summary: Mark a booking as completed
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - admin-bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/admin/bookings/{id}/reminders/:
+    get:
+      operationId: admin_bookings_reminders_list
+      description: Returns automatic and manually sent reminder records for this booking,
+        newest first.
+      summary: List reminders for one booking
+      parameters:
+      - in: query
+        name: booking_reference
+        schema:
+          type: string
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: futsal
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: phone
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: source
+        schema:
+          type: string
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - admin-reminders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReminderList'
+          description: ''
+  /api/v1/admin/bookings/{id}/reschedule/:
+    patch:
+      operationId: admin_bookings_reschedule_partial_update
+      description: Full booking management for admins.
+      summary: Reschedule any booking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - admin-bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRescheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRescheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRescheduleRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reschedule'
+          description: ''
+  /api/v1/admin/bookings/{id}/send-reminder/:
+    post:
+      operationId: admin_bookings_send_reminder_create
+      description: Full booking management for admins.
+      summary: Manually send a booking reminder email
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - admin-reminders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/admin/change-password/:
+    post:
+      operationId: admin_change_password_create
+      summary: Admin change password
+      tags:
+      - admin-profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/admin/contact/:
+    get:
+      operationId: admin_contact_list
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Admin contact message management
+      parameters:
+      - in: query
+        name: email
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - NEW
+          - RESOLVED
+        description: |-
+          * `NEW` - New
+          * `IN_PROGRESS` - In progress
+          * `RESOLVED` - Resolved
+      tags:
+      - admin-contact
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContactMessageList'
+          description: ''
+  /api/v1/admin/contact/{id}/:
+    get:
+      operationId: admin_contact_retrieve
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Admin contact message management
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this contact message.
+        required: true
+      tags:
+      - admin-contact
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessage'
+          description: ''
+    put:
+      operationId: admin_contact_update
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Admin contact message management
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this contact message.
+        required: true
+      tags:
+      - admin-contact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminContactUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminContactUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminContactUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminContactUpdate'
+          description: ''
+    patch:
+      operationId: admin_contact_partial_update
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Admin contact message management
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this contact message.
+        required: true
+      tags:
+      - admin-contact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminContactUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminContactUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminContactUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminContactUpdate'
+          description: ''
+  /api/v1/admin/futsal/:
+    get:
+      operationId: admin_futsal_retrieve
+      description: Admin read/update of the single futsal. Creation/deletion is not
+        supported.
+      summary: View or update the futsal configuration
+      tags:
+      - admin-futsal
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Futsal'
+          description: ''
+    patch:
+      operationId: admin_futsal_partial_update
+      description: Admin read/update of the single futsal. Creation/deletion is not
+        supported.
+      summary: View or update the futsal configuration
+      tags:
+      - admin-futsal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFutsalRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFutsalRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFutsalRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Futsal'
+          description: ''
+  /api/v1/admin/media/:
+    get:
+      operationId: admin_media_list
+      description: Upload and manage gallery assets.
+      parameters:
+      - in: query
+        name: is_cover
+        schema:
+          type: boolean
+      - in: query
+        name: media_type
+        schema:
+          type: string
+          enum:
+          - IMAGE
+          - VIDEO
+        description: |-
+          * `IMAGE` - Image
+          * `VIDEO` - Video
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin-media
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFutsalMediaList'
+          description: ''
+    post:
+      operationId: admin_media_create
+      description: Upload and manage gallery assets.
+      summary: Upload an image or video
+      tags:
+      - admin-media
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FutsalMediaUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FutsalMediaUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FutsalMediaUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutsalMedia'
+          description: ''
+  /api/v1/admin/media/{id}/:
+    get:
+      operationId: admin_media_retrieve
+      description: Upload and manage gallery assets.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this futsal media.
+        required: true
+      tags:
+      - admin-media
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutsalMedia'
+          description: ''
+    put:
+      operationId: admin_media_update
+      description: Upload and manage gallery assets.
+      summary: Update media metadata
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this futsal media.
+        required: true
+      tags:
+      - admin-media
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FutsalMediaUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FutsalMediaUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FutsalMediaUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutsalMedia'
+          description: ''
+    patch:
+      operationId: admin_media_partial_update
+      description: Upload and manage gallery assets.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this futsal media.
+        required: true
+      tags:
+      - admin-media
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFutsalMediaUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFutsalMediaUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFutsalMediaUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutsalMediaUpload'
+          description: ''
+    delete:
+      operationId: admin_media_destroy
+      description: Upload and manage gallery assets.
+      summary: Delete media and its stored asset
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this futsal media.
+        required: true
+      tags:
+      - admin-media
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/notifications/:
+    get:
+      operationId: admin_notifications_list
+      description: Returns only the current admin's in-app notifications, newest first.
+        `unread_count` is the total unread count before any read-state filter.
+      summary: List booking notifications
+      parameters:
+      - in: query
+        name: is_read
+        schema:
+          type: boolean
+        description: Boolean alias for the `read` filter.
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: read
+        schema:
+          type: string
+          enum:
+          - read
+          - unread
+        description: 'Optional state filter: `read` or `unread` (also accepts true/false).'
+      tags:
+      - admin-notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminNotificationList'
+          description: ''
+  /api/v1/admin/notifications/{id}/:
+    get:
+      operationId: admin_notifications_retrieve
+      description: Notifications belonging only to the authenticated administrator.
+      summary: Admin in-app booking notifications
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this admin notification.
+        required: true
+      tags:
+      - admin-notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminNotification'
+          description: ''
+  /api/v1/admin/notifications/{id}/mark-read/:
+    post:
+      operationId: admin_notifications_mark_read_create
+      description: Marks a notification owned by the current admin as read and returns
+        the updated unread badge count.
+      summary: Mark one notification as read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this admin notification.
+        required: true
+      tags:
+      - admin-notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminNotificationAction'
+          description: ''
+  /api/v1/admin/notifications/{id}/mark-unread/:
+    post:
+      operationId: admin_notifications_mark_unread_create
+      description: Marks a notification owned by the current admin as unread and returns
+        the updated unread badge count.
+      summary: Mark one notification as unread
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this admin notification.
+        required: true
+      tags:
+      - admin-notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminNotificationAction'
+          description: ''
+  /api/v1/admin/notifications/mark-all-read/:
+    post:
+      operationId: admin_notifications_mark_all_read_create
+      description: Marks every unread notification for the current admin as read.
+      summary: Mark all notifications as read
+      tags:
+      - admin-notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarkAllNotificationsRead'
+          description: ''
+  /api/v1/admin/profile/:
+    get:
+      operationId: admin_profile_retrieve
+      summary: Admin profile (view and update)
+      tags:
+      - admin-profile
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: admin_profile_partial_update
+      summary: Admin profile (view and update)
+      tags:
+      - admin-profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/admin/reminders/:
+    get:
+      operationId: admin_reminders_list
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Reminder history (automatic and manual)
+      parameters:
+      - in: query
+        name: booking
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: reminder_type
+        schema:
+          type: string
+          enum:
+          - AUTOMATIC_ONE_HOUR
+          - MANUAL
+        description: |-
+          * `AUTOMATIC_ONE_HOUR` - Automatic one hour
+          * `MANUAL` - Manual
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - FAILED
+          - PENDING
+          - SENT
+        description: |-
+          * `PENDING` - Pending
+          * `SENT` - Sent
+          * `FAILED` - Failed
+      tags:
+      - admin-reminders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReminderList'
+          description: ''
+  /api/v1/admin/reminders/{id}/:
+    get:
+      operationId: admin_reminders_retrieve
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Reminder history (automatic and manual)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this reminder.
+        required: true
+      tags:
+      - admin-reminders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+  /api/v1/admin/slots/:
+    get:
+      operationId: admin_slots_list
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: futsal
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - admin-slots
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSlotList'
+          description: ''
+    post:
+      operationId: admin_slots_create
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      summary: Create a one-hour slot
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlotWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SlotWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SlotWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotWrite'
+          description: ''
+  /api/v1/admin/slots/{id}/:
+    get:
+      operationId: admin_slots_retrieve
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this slot.
+        required: true
+      tags:
+      - admin-slots
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Slot'
+          description: ''
+    put:
+      operationId: admin_slots_update
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      summary: Update a slot
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this slot.
+        required: true
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlotWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SlotWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SlotWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotWrite'
+          description: ''
+    patch:
+      operationId: admin_slots_partial_update
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this slot.
+        required: true
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSlotWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSlotWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSlotWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotWrite'
+          description: ''
+    delete:
+      operationId: admin_slots_destroy
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      summary: Delete a slot (booked slots cannot be deleted)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this slot.
+        required: true
+      tags:
+      - admin-slots
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotDeleteResponse'
+          description: ''
+        '409':
+          description: A booked slot cannot be deleted.
+        '404':
+          description: Slot not found.
+  /api/v1/admin/slots/block-day/:
+    post:
+      operationId: admin_slots_block_day_create
+      description: Marks every AVAILABLE slot on the date as BLOCKED and records a
+        closure so slot generation will not repopulate the day. Slots with active
+        bookings are left untouched and reported in `skipped_booked_slots`, unless
+        `cancel_bookings=true`, which cancels and refunds them first.
+      summary: Block an entire day (holiday / maintenance)
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockDayRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BlockDayRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BlockDayRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockDay'
+          description: ''
+  /api/v1/admin/slots/block-range/:
+    post:
+      operationId: admin_slots_block_range_create
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      summary: Block a range of days
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockDayRangeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BlockDayRangeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BlockDayRangeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockDayRange'
+          description: ''
+  /api/v1/admin/slots/bulk-update/:
+    patch:
+      operationId: admin_slots_bulk_update_partial_update
+      description: Updates status and/or price for slot pairs on a date. Each per-slot
+        item must include start_time and end_time. Active booked slots are skipped
+        for status changes.
+      summary: Bulk-update slots for a date
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBulkSlotUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBulkSlotUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBulkSlotUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkSlotUpdate'
+          description: ''
+  /api/v1/admin/slots/closures/:
+    get:
+      operationId: admin_slots_closures_retrieve
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      summary: List closed days
+      tags:
+      - admin-slots
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutsalClosure'
+          description: ''
+  /api/v1/admin/slots/copy-next-day/:
+    post:
+      operationId: admin_slots_copy_next_day_create
+      description: Copies start time, end time and custom price from the previous
+        day. New slots are AVAILABLE and existing target slots are left unchanged.
+      summary: Copy the previous day's slots into the requested date
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlotCopyNextDayRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SlotCopyNextDayRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SlotCopyNextDayRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotCopyNextDay'
+          description: ''
+  /api/v1/admin/slots/generate/:
+    post:
+      operationId: admin_slots_generate_create
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      summary: Bulk-generate whole-hour slots for a date range from the opening hours
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlotGenerateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SlotGenerateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SlotGenerateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotGenerate'
+          description: ''
+  /api/v1/admin/slots/unblock-day/:
+    post:
+      operationId: admin_slots_unblock_day_create
+      description: 'Admin slot management: whole-hour slots such as 07:00 - 08:00.'
+      summary: Reopen a blocked day
+      tags:
+      - admin-slots
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnblockDayRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UnblockDayRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UnblockDayRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnblockDay'
+          description: ''
+  /api/v1/admin/users/:
+    get:
+      operationId: admin_users_list
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: List all non-admin users
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin-users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+  /api/v1/admin/users/{id}/booking-history/:
+    get:
+      operationId: admin_users_booking_history_list
+      description: Returns bookings owned by the selected non-admin user, including
+        bookings an admin created on their behalf using the user's email address.
+        Supports the same filters, search, ordering, and pagination as the admin booking
+        list.
+      summary: List a non-admin user's booking history
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin-users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+          description: ''
+  /api/v1/analytics/:
+    get:
+      operationId: analytics_retrieve
+      summary: Analytics dashboard
+      parameters:
+      - in: query
+        name: end_date
+        schema:
+          type: string
+        description: End date YYYY-MM-DD
+      - in: query
+        name: futsal
+        schema:
+          type: string
+        description: Optional futsal UUID
+      - in: query
+        name: period
+        schema:
+          type: string
+        description: '7d | 30d | 6m | 12m (default: 6m)'
+      - in: query
+        name: start_date
+        schema:
+          type: string
+        description: Start date YYYY-MM-DD
+      - in: query
+        name: timezone
+        schema:
+          type: string
+        description: Reporting timezone (metadata)
+      tags:
+      - analytics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/change-password/:
+    post:
+      operationId: auth_change_password_create
+      summary: Change password (invalidates existing refresh tokens)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/forgot-password/:
+    post:
+      operationId: auth_forgot_password_create
+      summary: Request a forgot-password OTP
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPassword'
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: auth_login_create
+      summary: Login and obtain JWT access/refresh tokens
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+          description: ''
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      summary: Logout and blacklist the refresh token
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Logout'
+          description: ''
+  /api/v1/auth/refresh/:
+    post:
+      operationId: auth_refresh_create
+      summary: 'Rotate refresh token: returns a NEW access and a NEW refresh token'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          description: New access and refresh tokens
+  /api/v1/auth/register/:
+    post:
+      operationId: auth_register_create
+      summary: Register a new (unverified) user and send a registration OTP
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/v1/auth/resend-otp/:
+    post:
+      operationId: auth_resend_otp_create
+      summary: Resend an OTP (rate limited)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendOTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendOTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendOTPRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResendOTP'
+          description: ''
+  /api/v1/auth/reset-password/:
+    post:
+      operationId: auth_reset_password_create
+      summary: Set a new password using the reset token
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetPassword'
+          description: ''
+  /api/v1/auth/verify-forgot-password-otp/:
+    post:
+      operationId: auth_verify_forgot_password_otp_create
+      summary: Verify forgot-password OTP and receive a reset token
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyForgotPasswordOTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyForgotPasswordOTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyForgotPasswordOTPRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyForgotPasswordOTP'
+          description: ''
+  /api/v1/auth/verify-otp/:
+    post:
+      operationId: auth_verify_otp_create
+      summary: Verify an OTP for a given purpose
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyOTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyOTPRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyOTP'
+          description: ''
+  /api/v1/bookings/:
+    get:
+      operationId: bookings_list
+      description: Authenticated users manage only their own bookings.
+      parameters:
+      - in: query
+        name: booking_reference
+        schema:
+          type: string
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: futsal
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: phone
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: source
+        schema:
+          type: string
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+          description: ''
+    post:
+      operationId: bookings_create
+      description: Authenticated users manage only their own bookings.
+      summary: Create a booking (409 if the slot is already booked)
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingCreate'
+          description: ''
+  /api/v1/bookings/{id}/:
+    get:
+      operationId: bookings_retrieve
+      description: Authenticated users manage only their own bookings.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+    patch:
+      operationId: bookings_partial_update
+      description: Authenticated users manage only their own bookings.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingUpdate'
+          description: ''
+  /api/v1/bookings/{id}/cancel/:
+    post:
+      operationId: bookings_cancel_create
+      description: Authenticated users manage only their own bookings.
+      summary: Cancel a booking and release the slot
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cancel'
+          description: ''
+  /api/v1/bookings/{id}/reschedule/:
+    patch:
+      operationId: bookings_reschedule_partial_update
+      description: Authenticated users manage only their own bookings.
+      summary: Reschedule a booking to a new available slot (atomic)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRescheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRescheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRescheduleRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reschedule'
+          description: ''
+  /api/v1/cms/gallery/category/:
+    get:
+      operationId: cms_gallery_category_list
+      description: Returns all active gallery categories. Admins see all categories
+        including inactive ones.
+      summary: List all gallery categories
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGalleryCategoryList'
+          description: ''
+    post:
+      operationId: cms_gallery_category_create
+      description: Create a new gallery category. Admin only.
+      summary: Create gallery category
+      tags:
+      - cms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GalleryCategoryCreateUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryCategory'
+          description: ''
+  /api/v1/cms/gallery/category/{id}/:
+    get:
+      operationId: cms_gallery_category_retrieve
+      description: Returns details of a specific gallery category.
+      summary: Get gallery category details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Category.
+        required: true
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryCategory'
+          description: ''
+    put:
+      operationId: cms_gallery_category_update
+      description: Manage gallery categories.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Category.
+        required: true
+      tags:
+      - cms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GalleryCategoryCreateUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryCategoryCreateUpdate'
+          description: ''
+    patch:
+      operationId: cms_gallery_category_partial_update
+      description: Update gallery category details. Admin only.
+      summary: Update gallery category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Category.
+        required: true
+      tags:
+      - cms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryCategoryCreateUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryCategory'
+          description: ''
+    delete:
+      operationId: cms_gallery_category_destroy
+      description: Delete a gallery category. Admin only.
+      summary: Delete gallery category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Category.
+        required: true
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/cms/gallery/highlights/:
+    get:
+      operationId: cms_gallery_highlights_list
+      description: Returns all active gallery highlight videos. Admins see all highlights
+        including inactive ones.
+      summary: List all gallery highlights
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGalleryHighlightList'
+          description: ''
+    post:
+      operationId: cms_gallery_highlights_create
+      description: Upload a new highlight video to Cloudinary. Admin only.
+      summary: Upload gallery highlight video
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GalleryHighlightUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GalleryHighlightUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GalleryHighlightUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryHighlight'
+          description: ''
+  /api/v1/cms/gallery/highlights/{id}/:
+    get:
+      operationId: cms_gallery_highlights_retrieve
+      description: Returns details of a specific gallery highlight.
+      summary: Get gallery highlight details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Highlight.
+        required: true
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryHighlight'
+          description: ''
+    put:
+      operationId: cms_gallery_highlights_update
+      description: Manage gallery highlight videos.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Highlight.
+        required: true
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GalleryHighlightUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GalleryHighlightUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GalleryHighlightUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryHighlightUpload'
+          description: ''
+    patch:
+      operationId: cms_gallery_highlights_partial_update
+      description: Update gallery highlight video or metadata. Admin only.
+      summary: Update gallery highlight
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Highlight.
+        required: true
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryHighlightUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryHighlightUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryHighlightUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryHighlight'
+          description: ''
+    delete:
+      operationId: cms_gallery_highlights_destroy
+      description: Delete a gallery highlight. Admin only.
+      summary: Delete gallery highlight
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Highlight.
+        required: true
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/cms/gallery/images/:
+    get:
+      operationId: cms_gallery_images_list
+      description: Returns all active gallery images. Admins see all images including
+        inactive ones. Can filter by category.
+      summary: List all gallery images
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGalleryImageList'
+          description: ''
+    post:
+      operationId: cms_gallery_images_create
+      description: Upload a new gallery image to Cloudinary. Admin only.
+      summary: Upload gallery image
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GalleryImageUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GalleryImageUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GalleryImageUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryImage'
+          description: ''
+  /api/v1/cms/gallery/images/{id}/:
+    get:
+      operationId: cms_gallery_images_retrieve
+      description: Returns details of a specific gallery image.
+      summary: Get gallery image details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Image.
+        required: true
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryImage'
+          description: ''
+    put:
+      operationId: cms_gallery_images_update
+      description: Manage gallery images.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Image.
+        required: true
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GalleryImageUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GalleryImageUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GalleryImageUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryImageUpload'
+          description: ''
+    patch:
+      operationId: cms_gallery_images_partial_update
+      description: Update gallery image or metadata. Admin only.
+      summary: Update gallery image
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Image.
+        required: true
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryImageUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryImageUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGalleryImageUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryImage'
+          description: ''
+    delete:
+      operationId: cms_gallery_images_destroy
+      description: Delete a gallery image. Admin only.
+      summary: Delete gallery image
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Gallery Image.
+        required: true
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/cms/homepage/arena/:
+    get:
+      operationId: cms_homepage_arena_retrieve
+      description: Returns the homepage arena section content including title, description,
+        and features array.
+      summary: Get arena section content
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArenaSection'
+          description: ''
+    patch:
+      operationId: cms_homepage_arena_partial_update
+      description: Update arena section content. Only include fields you want to change.
+        Admin only.
+      summary: Update arena section content
+      tags:
+      - cms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedArenaSectionUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArenaSection'
+          description: ''
+  /api/v1/cms/homepage/carousel/:
+    get:
+      operationId: cms_homepage_carousel_list
+      description: Returns all active carousel images. Admins see all images including
+        inactive ones.
+      summary: List all carousel images
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCarouselImageList'
+          description: ''
+    post:
+      operationId: cms_homepage_carousel_create
+      description: Upload a new carousel image. Admin only.
+      summary: Upload carousel image
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarouselImageUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarouselImageUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarouselImageUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarouselImage'
+          description: ''
+  /api/v1/cms/homepage/carousel/{id}/:
+    get:
+      operationId: cms_homepage_carousel_retrieve
+      description: Returns details of a specific carousel image.
+      summary: Get carousel image details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Carousel Image.
+        required: true
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarouselImage'
+          description: ''
+    put:
+      operationId: cms_homepage_carousel_update
+      description: Manage homepage carousel images.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Carousel Image.
+        required: true
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarouselImageUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarouselImageUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarouselImageUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarouselImageUpload'
+          description: ''
+    patch:
+      operationId: cms_homepage_carousel_partial_update
+      description: Update carousel image or metadata. Admin only.
+      summary: Update carousel image
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Carousel Image.
+        required: true
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCarouselImageUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCarouselImageUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCarouselImageUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarouselImage'
+          description: ''
+    delete:
+      operationId: cms_homepage_carousel_destroy
+      description: Deletes the carousel image and removes it from Cloudinary. Admin
+        only.
+      summary: Delete carousel image
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Carousel Image.
+        required: true
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/cms/homepage/hero-section/:
+    get:
+      operationId: cms_homepage_hero_section_retrieve
+      description: Returns the homepage hero section content including title, description,
+        image, and stats.
+      summary: Get hero section content
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeroSection'
+          description: ''
+    patch:
+      operationId: cms_homepage_hero_section_partial_update
+      description: Update hero section content. Only include fields you want to change.
+        Admin only.
+      summary: Update hero section content
+      tags:
+      - cms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedHeroSectionUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedHeroSectionUpdateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedHeroSectionUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeroSection'
+          description: ''
+  /api/v1/cms/homepage/why-us/:
+    get:
+      operationId: cms_homepage_why_us_retrieve
+      description: Returns the homepage why us section content including title, description,
+        and features array with objects.
+      summary: Get why us section content
+      tags:
+      - cms
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WhyUsSection'
+          description: ''
+    patch:
+      operationId: cms_homepage_why_us_partial_update
+      description: Update why us section content. Only include fields you want to
+        change. Admin only.
+      summary: Update why us section content
+      tags:
+      - cms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWhyUsSectionUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WhyUsSection'
+          description: ''
+  /api/v1/cms/testimonials/:
+    get:
+      operationId: cms_testimonials_list
+      description: Returns all active testimonials. Admins see all testimonials including
+        inactive ones.
+      summary: List all testimonials
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - testimonials
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTestimonialList'
+          description: ''
+    post:
+      operationId: cms_testimonials_create
+      description: Upload a customer testimonial with optional image. Admin only.
+      summary: Create a new testimonial
+      tags:
+      - testimonials
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestimonialUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestimonialUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestimonialUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Testimonial'
+          description: ''
+  /api/v1/cms/testimonials/{id}/:
+    get:
+      operationId: cms_testimonials_retrieve
+      description: Returns details of a specific testimonial.
+      summary: Get testimonial details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Testimonial.
+        required: true
+      tags:
+      - testimonials
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Testimonial'
+          description: ''
+    put:
+      operationId: cms_testimonials_update
+      description: Manage customer testimonials.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Testimonial.
+        required: true
+      tags:
+      - testimonials
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestimonialUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestimonialUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestimonialUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestimonialUpload'
+          description: ''
+    patch:
+      operationId: cms_testimonials_partial_update
+      description: Update testimonial details or replace the image. Admin only.
+      summary: Update testimonial
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Testimonial.
+        required: true
+      tags:
+      - testimonials
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTestimonialUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTestimonialUploadRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTestimonialUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Testimonial'
+          description: ''
+    delete:
+      operationId: cms_testimonials_destroy
+      description: Deletes the testimonial and removes the image from Cloudinary.
+        Admin only.
+      summary: Delete testimonial
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Testimonial.
+        required: true
+      tags:
+      - testimonials
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/contact/:
+    post:
+      operationId: contact_create
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Submit a contact message
+      tags:
+      - contact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessage'
+          description: ''
+  /api/v1/dashboard/:
+    get:
+      operationId: dashboard_retrieve
+      summary: Today's operational dashboard
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Operating date YYYY-MM-DD
+      - in: query
+        name: futsal
+        schema:
+          type: string
+        description: Optional futsal UUID
+      - in: query
+        name: timezone
+        schema:
+          type: string
+        description: Timezone for date and time calculations
+      tags:
+      - dashboard
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/futsal/:
+    get:
+      operationId: futsal_retrieve
+      description: Public read of the one configured futsal.
+      summary: Futsal details (single venue)
+      tags:
+      - futsal
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Futsal'
+          description: ''
+  /api/v1/futsal-media/:
+    get:
+      operationId: futsal_media_list
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Public futsal gallery (images and videos)
+      parameters:
+      - in: query
+        name: is_cover
+        schema:
+          type: boolean
+      - in: query
+        name: media_type
+        schema:
+          type: string
+          enum:
+          - IMAGE
+          - VIDEO
+        description: |-
+          * `IMAGE` - Image
+          * `VIDEO` - Video
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - futsal
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFutsalMediaList'
+          description: ''
+  /api/v1/futsal-media/{id}/:
+    get:
+      operationId: futsal_media_retrieve
+      description: Wraps successful generic-view responses in {success,message,data}.
+      summary: Public futsal gallery (images and videos)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this futsal media.
+        required: true
+      tags:
+      - futsal
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FutsalMedia'
+          description: ''
+  /api/v1/internal/cron/reminders/:
+    get:
+      operationId: internal_cron_reminders_retrieve
+      description: 'Replaces Celery Beat where no scheduler process can run. Requires
+        the `Authorization: Bearer <CRON_SECRET>` header.'
+      summary: 'Cron: dispatch due booking reminders'
+      tags:
+      - internal
+      security:
+      - {}
+      responses:
+        '200':
+          description: Reminders dispatched.
+        '401':
+          description: Missing or invalid cron secret.
+    post:
+      operationId: internal_cron_reminders_create
+      description: Schedulers issue GET; POST is allowed for manual curl triggers.
+      summary: 'Cron: dispatch due booking reminders (POST alias)'
+      tags:
+      - internal
+      security:
+      - {}
+      responses:
+        '200':
+          description: Reminders dispatched.
+        '401':
+          description: Missing or invalid cron secret.
+  /api/v1/slots/:
+    get:
+      operationId: slots_list
+      description: Returns upcoming slots. If a specific date is provided and that
+        date is closed, returns closure information.
+      summary: List upcoming slots date-wise
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Filter by date (YYYY-MM-DD)
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: futsal
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - slots
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSlotList'
+          description: ''
+  /api/v1/slots/{id}/:
+    get:
+      operationId: slots_retrieve
+      description: Read-only slot access for users. Users can never modify slots.
+      summary: Retrieve a slot
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this slot.
+        required: true
+      tags:
+      - slots
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Slot'
+          description: ''
+  /api/v1/slots/date-wise/:
+    get:
+      operationId: slots_date_wise_retrieve
+      description: Read-only slot access for users. Users can never modify slots.
+      summary: List slots for a specific date
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Date to retrieve slots for (YYYY-MM-DD)
+        required: true
+      tags:
+      - slots
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Slot'
+          description: ''
+  /api/v1/users/me/:
+    get:
+      operationId: users_me_retrieve
+      summary: Retrieve or update the authenticated user's profile
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: users_me_partial_update
+      summary: Retrieve or update the authenticated user's profile
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /healthz/:
+    get:
+      operationId: healthz_retrieve
+      description: Returns 200 when the application and database are reachable.
+      summary: Health check
+      tags:
+      - internal
+      security:
+      - {}
+      responses:
+        '200':
+          description: Service healthy.
+        '503':
+          description: Database unreachable.
+components:
+  schemas:
+    AdminBookingCreate:
+      type: object
+      properties:
+        slot_id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          maxLength: 20
+        notes:
+          type: string
+          default: ''
+        payment_method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          default: CASH
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AdminBookingCreateStatusEnum'
+          default: PENDING
+        advance_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - email
+      - full_name
+      - phone_number
+      - slot_id
+    AdminBookingCreateRequest:
+      type: object
+      properties:
+        slot_id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        notes:
+          type: string
+          default: ''
+        payment_method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          default: CASH
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AdminBookingCreateStatusEnum'
+          default: PENDING
+        advance_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - email
+      - full_name
+      - phone_number
+      - slot_id
+    AdminBookingCreateStatusEnum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      type: string
+      description: |-
+        * `PENDING` - PENDING
+        * `CONFIRMED` - CONFIRMED
+    AdminBookingUpdate:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/BookingStatusEnum'
+        full_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          maxLength: 20
+        notes:
+          type: string
+        reason:
+          type: string
+          maxLength: 255
+        advance_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+    AdminBookingUpdateRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/BookingStatusEnum'
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        notes:
+          type: string
+        reason:
+          type: string
+          maxLength: 255
+        advance_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+    AdminContactUpdate:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ContactStatusEnum'
+        admin_notes:
+          type: string
+    AdminContactUpdateRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ContactStatusEnum'
+        admin_notes:
+          type: string
+    AdminNotification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        booking:
+          type: string
+          format: uuid
+          readOnly: true
+        booking_reference:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        time_ago:
+          type: string
+          readOnly: true
+        redirect_url:
+          type: string
+          description: Frontend route for opening the booking that caused this notification.
+          readOnly: true
+      required:
+      - booking
+      - booking_reference
+      - created_at
+      - id
+      - is_read
+      - message
+      - read_at
+      - redirect_url
+      - time_ago
+      - title
+    AdminNotificationAction:
+      type: object
+      description: Notification returned by a read-state action, with bell badge count.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        booking:
+          type: string
+          format: uuid
+          readOnly: true
+        booking_reference:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        time_ago:
+          type: string
+          readOnly: true
+        redirect_url:
+          type: string
+          description: Frontend route for opening the booking that caused this notification.
+          readOnly: true
+        unread_count:
+          type: integer
+          readOnly: true
+      required:
+      - booking
+      - booking_reference
+      - created_at
+      - id
+      - is_read
+      - message
+      - read_at
+      - redirect_url
+      - time_ago
+      - title
+      - unread_count
+    AdminNotificationList:
+      type: object
+      description: The paginated notification data returned by the list endpoint.
+      properties:
+        count:
+          type: integer
+          readOnly: true
+        next:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminNotification'
+          readOnly: true
+        unread_count:
+          type: integer
+          readOnly: true
+      required:
+      - count
+      - next
+      - previous
+      - results
+      - unread_count
+    ArenaSection:
+      type: object
+      description: Serializer for arena section display.
+      properties:
+        title:
+          type: string
+          description: Arena section title
+          maxLength: 200
+        description:
+          type: string
+          description: Arena description text
+        features:
+          description: Array of feature strings
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - description
+      - title
+      - updated_at
+    BlockDay:
+      type: object
+      description: Close the futsal for one whole day.
+      properties:
+        date:
+          type: string
+          format: date
+        reason:
+          type: string
+          default: ''
+          maxLength: 255
+        cancel_bookings:
+          type: boolean
+          default: false
+          description: Cancel and refund any existing bookings on this date.
+      required:
+      - date
+    BlockDayRange:
+      type: object
+      description: Close the futsal for a range of days.
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+          default: ''
+          maxLength: 255
+        cancel_bookings:
+          type: boolean
+          default: false
+      required:
+      - start_date
+    BlockDayRangeRequest:
+      type: object
+      description: Close the futsal for a range of days.
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+          default: ''
+          maxLength: 255
+        cancel_bookings:
+          type: boolean
+          default: false
+      required:
+      - start_date
+    BlockDayRequest:
+      type: object
+      description: Close the futsal for one whole day.
+      properties:
+        date:
+          type: string
+          format: date
+        reason:
+          type: string
+          default: ''
+          maxLength: 255
+        cancel_bookings:
+          type: boolean
+          default: false
+          description: Cancel and refund any existing bookings on this date.
+      required:
+      - date
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        booking_reference:
+          type: string
+          readOnly: true
+        slot:
+          type: string
+          readOnly: true
+        futsal_name:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        phone_number:
+          type: string
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BookingStatusEnum'
+          readOnly: true
+        booking_source:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        payment_status:
+          type: string
+          readOnly: true
+        payment_method:
+          type: string
+          readOnly: true
+        advance_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        remaining_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancellation_reason:
+          type: string
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - advance_amount
+      - amount
+      - booking_reference
+      - booking_source
+      - cancellation_reason
+      - cancelled_at
+      - created_at
+      - email
+      - full_name
+      - futsal_name
+      - id
+      - notes
+      - payment_method
+      - payment_status
+      - phone_number
+      - remaining_amount
+      - slot
+      - status
+      - updated_at
+    BookingCreate:
+      type: object
+      properties:
+        slot_id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          maxLength: 20
+        notes:
+          type: string
+          default: ''
+      required:
+      - email
+      - full_name
+      - phone_number
+      - slot_id
+    BookingCreateRequest:
+      type: object
+      properties:
+        slot_id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        notes:
+          type: string
+          default: ''
+      required:
+      - email
+      - full_name
+      - phone_number
+      - slot_id
+    BookingDeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+          default: Booking cancelled successfully
+    BookingStatusEnum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - CANCELLED
+      - COMPLETED
+      - RESCHEDULED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `CONFIRMED` - Confirmed
+        * `CANCELLED` - Cancelled
+        * `COMPLETED` - Completed
+        * `RESCHEDULED` - Rescheduled
+    BookingUpdate:
+      type: object
+      description: User-editable booking contact details.
+      properties:
+        full_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          maxLength: 20
+        notes:
+          type: string
+    BulkSlotItem:
+      type: object
+      properties:
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        status:
+          $ref: '#/components/schemas/Status220Enum'
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+      required:
+      - end_time
+      - start_time
+    BulkSlotItemRequest:
+      type: object
+      properties:
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        status:
+          $ref: '#/components/schemas/Status220Enum'
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+      required:
+      - end_time
+      - start_time
+    BulkSlotUpdate:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/Status220Enum'
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkSlotItem'
+      required:
+      - date
+    Cancel:
+      type: object
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 255
+    CancelRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 255
+    CarouselImage:
+      type: object
+      description: Serializer for carousel image display.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        image_url:
+          type: string
+          readOnly: true
+        alt_text:
+          type: string
+          description: Alt text for accessibility
+          maxLength: 200
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+        is_active:
+          type: boolean
+          description: Show in carousel
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - alt_text
+      - created_at
+      - id
+      - image_url
+      - updated_at
+    CarouselImageUpload:
+      type: object
+      description: Serializer for creating/updating carousel images.
+      properties:
+        image:
+          type: string
+          format: uri
+          description: Carousel image
+        alt_text:
+          type: string
+          description: Alt text for accessibility
+          maxLength: 200
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+        is_active:
+          type: boolean
+          description: Show in carousel
+      required:
+      - alt_text
+      - image
+    CarouselImageUploadRequest:
+      type: object
+      description: Serializer for creating/updating carousel images.
+      properties:
+        image:
+          type: string
+          format: binary
+          description: Carousel image
+        alt_text:
+          type: string
+          minLength: 1
+          description: Alt text for accessibility
+          maxLength: 200
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+        is_active:
+          type: boolean
+          description: Show in carousel
+      required:
+      - alt_text
+      - image
+    ChangePasswordRequest:
+      type: object
+      properties:
+        old_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - confirm_password
+      - new_password
+      - old_password
+    ContactMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 20
+        subject:
+          type: string
+          maxLength: 150
+        message:
+          type: string
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ContactStatusEnum'
+          readOnly: true
+        admin_notes:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - admin_notes
+      - created_at
+      - email
+      - id
+      - message
+      - name
+      - phone_number
+      - status
+      - subject
+      - updated_at
+    ContactMessageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 150
+        message:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - message
+      - name
+      - phone_number
+      - subject
+    ContactStatusEnum:
+      enum:
+      - NEW
+      - IN_PROGRESS
+      - RESOLVED
+      type: string
+      description: |-
+        * `NEW` - New
+        * `IN_PROGRESS` - In progress
+        * `RESOLVED` - Resolved
+    ForgotPassword:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    Futsal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        description:
+          type: string
+        location:
+          type: string
+          maxLength: 150
+        address:
+          type: string
+          maxLength: 255
+        phone:
+          type: string
+          maxLength: 20
+        email:
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        price_per_slot:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        slot_duration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Minutes
+        opening_time:
+          type: string
+          format: time
+        closing_time:
+          type: string
+          format: time
+        status:
+          $ref: '#/components/schemas/FutsalStatusEnum'
+        facebook:
+          description: Facebook page URL
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        instagram:
+          description: Instagram profile URL
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        twitter:
+          description: Twitter/X profile URL
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        tiktok:
+          description: TikTok profile URL
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - closing_time
+      - created_at
+      - id
+      - location
+      - name
+      - opening_time
+      - price_per_slot
+      - updated_at
+    FutsalClosure:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        date:
+          type: string
+          format: date
+          readOnly: true
+        reason:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - date
+      - id
+      - reason
+    FutsalMedia:
+      type: object
+      description: Read representation of a gallery item.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        media_type:
+          allOf:
+          - $ref: '#/components/schemas/MediaTypeEnum'
+          readOnly: true
+        url:
+          type: string
+          nullable: true
+          readOnly: true
+        caption:
+          type: string
+          readOnly: true
+        is_cover:
+          type: boolean
+          readOnly: true
+        sort_order:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - caption
+      - created_at
+      - id
+      - is_cover
+      - media_type
+      - sort_order
+      - url
+    FutsalMediaUpload:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        media_type:
+          $ref: '#/components/schemas/MediaTypeEnum'
+        image:
+          type: string
+          format: uri
+          nullable: true
+        video:
+          type: string
+          format: uri
+          nullable: true
+        caption:
+          type: string
+          maxLength: 255
+        is_cover:
+          type: boolean
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - id
+    FutsalMediaUploadRequest:
+      type: object
+      properties:
+        media_type:
+          $ref: '#/components/schemas/MediaTypeEnum'
+        image:
+          type: string
+          format: binary
+          nullable: true
+        video:
+          type: string
+          format: binary
+          nullable: true
+        caption:
+          type: string
+          maxLength: 255
+        is_cover:
+          type: boolean
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+    FutsalStatusEnum:
+      enum:
+      - ACTIVE
+      - INACTIVE
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `INACTIVE` - Inactive
+    GalleryCategory:
+      type: object
+      description: Serializer for gallery category display.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          description: Category name (e.g., 'Tournaments', 'Facilities', 'Events')
+          maxLength: 100
+        slug:
+          type: string
+          readOnly: true
+          description: URL-friendly version of name
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+          description: Optional category description
+        is_active:
+          type: boolean
+          description: Show category on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - slug
+      - updated_at
+    GalleryCategoryCreateUpdate:
+      type: object
+      description: Serializer for creating/updating gallery categories.
+      properties:
+        name:
+          type: string
+          description: Category name (e.g., 'Tournaments', 'Facilities', 'Events')
+          maxLength: 100
+        description:
+          type: string
+          description: Optional category description
+        is_active:
+          type: boolean
+          description: Show category on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+      required:
+      - name
+    GalleryCategoryCreateUpdateRequest:
+      type: object
+      description: Serializer for creating/updating gallery categories.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Category name (e.g., 'Tournaments', 'Facilities', 'Events')
+          maxLength: 100
+        description:
+          type: string
+          description: Optional category description
+        is_active:
+          type: boolean
+          description: Show category on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+      required:
+      - name
+    GalleryHighlight:
+      type: object
+      description: Serializer for gallery highlight display.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          description: Video title
+          maxLength: 200
+        video_url:
+          type: string
+          readOnly: true
+        thumbnail_url:
+          type: string
+          readOnly: true
+        tags:
+          description: Array of tag strings (e.g., ['goal', 'save', 'skills'])
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - thumbnail_url
+      - title
+      - updated_at
+      - video_url
+    GalleryHighlightUpload:
+      type: object
+      description: Serializer for creating/updating gallery highlights.
+      properties:
+        title:
+          type: string
+          description: Video title
+          maxLength: 200
+        video:
+          type: string
+          format: uri
+          description: Highlight video (Cloudinary)
+        thumbnail:
+          type: string
+          format: uri
+          nullable: true
+          description: Video thumbnail (optional)
+        tags:
+          description: Array of tag strings (e.g., ['goal', 'save', 'skills'])
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order
+      required:
+      - title
+      - video
+    GalleryHighlightUploadRequest:
+      type: object
+      description: Serializer for creating/updating gallery highlights.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Video title
+          maxLength: 200
+        video:
+          type: string
+          format: binary
+          description: Highlight video (Cloudinary)
+        thumbnail:
+          type: string
+          format: binary
+          nullable: true
+          description: Video thumbnail (optional)
+        tags:
+          description: Array of tag strings (e.g., ['goal', 'save', 'skills'])
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order
+      required:
+      - title
+      - video
+    GalleryImage:
+      type: object
+      description: Serializer for gallery image display.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          description: Image title
+          maxLength: 200
+        image_url:
+          type: string
+          readOnly: true
+        alt_text:
+          type: string
+          description: Alt text for accessibility
+          maxLength: 200
+        category:
+          type: string
+          format: uuid
+          description: Gallery category
+        category_name:
+          type: string
+          readOnly: true
+        category_slug:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order within category
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - alt_text
+      - category
+      - category_name
+      - category_slug
+      - created_at
+      - id
+      - image_url
+      - title
+      - updated_at
+    GalleryImageUpload:
+      type: object
+      description: Serializer for creating/updating gallery images.
+      properties:
+        title:
+          type: string
+          description: Image title
+          maxLength: 200
+        image:
+          type: string
+          format: uri
+          description: Gallery image
+        alt_text:
+          type: string
+          description: Alt text for accessibility
+          maxLength: 200
+        category:
+          type: string
+          format: uuid
+          description: Gallery category
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order within category
+      required:
+      - alt_text
+      - category
+      - image
+      - title
+    GalleryImageUploadRequest:
+      type: object
+      description: Serializer for creating/updating gallery images.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Image title
+          maxLength: 200
+        image:
+          type: string
+          format: binary
+          description: Gallery image
+        alt_text:
+          type: string
+          minLength: 1
+          description: Alt text for accessibility
+          maxLength: 200
+        category:
+          type: string
+          format: uuid
+          description: Gallery category
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order within category
+      required:
+      - alt_text
+      - category
+      - image
+      - title
+    HeroSection:
+      type: object
+      description: Serializer for hero section display.
+      properties:
+        title_one:
+          type: string
+          description: First line of title
+          maxLength: 200
+        title_two:
+          type: string
+          description: Second line of title
+          maxLength: 200
+        description:
+          type: string
+          description: Hero description text
+        image_url:
+          type: string
+          readOnly: true
+        stats:
+          type: string
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - description
+      - image_url
+      - stats
+      - title_one
+      - title_two
+      - updated_at
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    Logout:
+      type: object
+      properties:
+        refresh:
+          type: string
+      required:
+      - refresh
+    LogoutRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    MarkAllNotificationsRead:
+      type: object
+      properties:
+        marked_as_read:
+          type: integer
+          readOnly: true
+        unread_count:
+          type: integer
+          readOnly: true
+      required:
+      - marked_as_read
+      - unread_count
+    MediaTypeEnum:
+      enum:
+      - IMAGE
+      - VIDEO
+      type: string
+      description: |-
+        * `IMAGE` - Image
+        * `VIDEO` - Video
+    PaginatedBookingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+    PaginatedCarouselImageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CarouselImage'
+    PaginatedContactMessageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactMessage'
+    PaginatedFutsalMediaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FutsalMedia'
+    PaginatedGalleryCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GalleryCategory'
+    PaginatedGalleryHighlightList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GalleryHighlight'
+    PaginatedGalleryImageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GalleryImage'
+    PaginatedReminderList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reminder'
+    PaginatedSlotList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Slot'
+    PaginatedTestimonialList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Testimonial'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PatchedAdminBookingUpdateRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/BookingStatusEnum'
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        notes:
+          type: string
+        reason:
+          type: string
+          maxLength: 255
+        advance_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+    PatchedAdminContactUpdateRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ContactStatusEnum'
+        admin_notes:
+          type: string
+    PatchedArenaSectionUpdateRequest:
+      type: object
+      description: Serializer for updating arena section.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Arena section title
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+          description: Arena description text
+        features:
+          description: Array of feature strings
+    PatchedBookingUpdateRequest:
+      type: object
+      description: User-editable booking contact details.
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        notes:
+          type: string
+    PatchedBulkSlotUpdateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/Status220Enum'
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkSlotItemRequest'
+    PatchedCarouselImageUploadRequest:
+      type: object
+      description: Serializer for creating/updating carousel images.
+      properties:
+        image:
+          type: string
+          format: binary
+          description: Carousel image
+        alt_text:
+          type: string
+          minLength: 1
+          description: Alt text for accessibility
+          maxLength: 200
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+        is_active:
+          type: boolean
+          description: Show in carousel
+    PatchedFutsalMediaUploadRequest:
+      type: object
+      properties:
+        media_type:
+          $ref: '#/components/schemas/MediaTypeEnum'
+        image:
+          type: string
+          format: binary
+          nullable: true
+        video:
+          type: string
+          format: binary
+          nullable: true
+        caption:
+          type: string
+          maxLength: 255
+        is_cover:
+          type: boolean
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+    PatchedFutsalRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: string
+        location:
+          type: string
+          minLength: 1
+          maxLength: 150
+        address:
+          type: string
+          maxLength: 255
+        phone:
+          type: string
+          maxLength: 20
+        email:
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        price_per_slot:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        slot_duration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Minutes
+        opening_time:
+          type: string
+          format: time
+        closing_time:
+          type: string
+          format: time
+        status:
+          $ref: '#/components/schemas/FutsalStatusEnum'
+        facebook:
+          description: Facebook page URL
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        instagram:
+          description: Instagram profile URL
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        twitter:
+          description: Twitter/X profile URL
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        tiktok:
+          description: TikTok profile URL
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+    PatchedGalleryCategoryCreateUpdateRequest:
+      type: object
+      description: Serializer for creating/updating gallery categories.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Category name (e.g., 'Tournaments', 'Facilities', 'Events')
+          maxLength: 100
+        description:
+          type: string
+          description: Optional category description
+        is_active:
+          type: boolean
+          description: Show category on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+    PatchedGalleryHighlightUploadRequest:
+      type: object
+      description: Serializer for creating/updating gallery highlights.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Video title
+          maxLength: 200
+        video:
+          type: string
+          format: binary
+          description: Highlight video (Cloudinary)
+        thumbnail:
+          type: string
+          format: binary
+          nullable: true
+          description: Video thumbnail (optional)
+        tags:
+          description: Array of tag strings (e.g., ['goal', 'save', 'skills'])
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order
+    PatchedGalleryImageUploadRequest:
+      type: object
+      description: Serializer for creating/updating gallery images.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Image title
+          maxLength: 200
+        image:
+          type: string
+          format: binary
+          description: Gallery image
+        alt_text:
+          type: string
+          minLength: 1
+          description: Alt text for accessibility
+          maxLength: 200
+        category:
+          type: string
+          format: uuid
+          description: Gallery category
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order within category
+    PatchedHeroSectionUpdateRequest:
+      type: object
+      description: Serializer for updating hero section.
+      properties:
+        title_one:
+          type: string
+          minLength: 1
+          description: First line of title
+          maxLength: 200
+        title_two:
+          type: string
+          minLength: 1
+          description: Second line of title
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+          description: Hero description text
+        image:
+          type: string
+          format: binary
+          nullable: true
+          description: Hero background image
+        stat_open_label:
+          type: string
+          minLength: 1
+          description: Stat 1 label
+          maxLength: 100
+        stat_open_value:
+          type: string
+          minLength: 1
+          description: Stat 1 value
+          maxLength: 50
+        stat_matches_label:
+          type: string
+          minLength: 1
+          description: Stat 2 label
+          maxLength: 100
+        stat_matches_value:
+          type: string
+          minLength: 1
+          description: Stat 2 value
+          maxLength: 50
+        stat_courts_label:
+          type: string
+          minLength: 1
+          description: Stat 3 label
+          maxLength: 100
+        stat_courts_value:
+          type: string
+          minLength: 1
+          description: Stat 3 value
+          maxLength: 50
+    PatchedProfileUpdateRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+    PatchedRescheduleRequest:
+      type: object
+      properties:
+        new_slot_id:
+          type: string
+          format: uuid
+    PatchedSlotWriteRequest:
+      type: object
+      description: |-
+        Admin slot create/update.
+
+        The futsal is implicit (single-venue system) and slots run on whole hours,
+        e.g. 07:00 - 08:00.
+      properties:
+        date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+          description: Overrides futsal price when set.
+        status:
+          $ref: '#/components/schemas/SlotStatusEnum'
+    PatchedTestimonialUploadRequest:
+      type: object
+      description: Serializer for creating/updating testimonials with image upload.
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          description: Customer's full name
+          maxLength: 200
+        title:
+          type: string
+          minLength: 1
+          description: Job title or role (e.g., 'Regular Player', 'Tournament Organizer')
+          maxLength: 200
+        image:
+          type: string
+          format: binary
+          nullable: true
+          description: Customer photo
+        content:
+          type: string
+          minLength: 1
+          description: Testimonial content/review
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+    PatchedWhyUsSectionUpdateRequest:
+      type: object
+      description: Serializer for updating why us section.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Why us section title
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+          description: Why us description text
+        features:
+          description: Array of feature objects with iconcode, title, and description
+    PaymentMethodEnum:
+      enum:
+      - CASH
+      - CARD
+      - ESEWA
+      - KHALTI
+      - BANK_TRANSFER
+      type: string
+      description: |-
+        * `CASH` - Cash
+        * `CARD` - Card
+        * `ESEWA` - eSewa
+        * `KHALTI` - Khalti
+        * `BANK_TRANSFER` - Bank transfer
+    PurposeEnum:
+      enum:
+      - REGISTRATION
+      - FORGOT_PASSWORD
+      type: string
+      description: |-
+        * `REGISTRATION` - Registration
+        * `FORGOT_PASSWORD` - Forgot password
+    RefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    Register:
+      type: object
+      properties:
+        full_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+          maxLength: 20
+      required:
+      - email
+      - full_name
+      - phone_number
+    RegisterRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - confirm_password
+      - email
+      - full_name
+      - password
+      - phone_number
+    Reminder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        booking:
+          type: string
+          format: uuid
+          readOnly: true
+        booking_reference:
+          type: string
+          readOnly: true
+        reminder_type:
+          allOf:
+          - $ref: '#/components/schemas/ReminderTypeEnum'
+          readOnly: true
+        scheduled_at:
+          type: string
+          format: date-time
+          readOnly: true
+        sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReminderStatusEnum'
+          readOnly: true
+        error_message:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - booking
+      - booking_reference
+      - created_at
+      - error_message
+      - id
+      - reminder_type
+      - scheduled_at
+      - sent_at
+      - status
+    ReminderStatusEnum:
+      enum:
+      - PENDING
+      - SENT
+      - FAILED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `SENT` - Sent
+        * `FAILED` - Failed
+    ReminderTypeEnum:
+      enum:
+      - AUTOMATIC_ONE_HOUR
+      - MANUAL
+      type: string
+      description: |-
+        * `AUTOMATIC_ONE_HOUR` - Automatic one hour
+        * `MANUAL` - Manual
+    Reschedule:
+      type: object
+      properties:
+        new_slot_id:
+          type: string
+          format: uuid
+      required:
+      - new_slot_id
+    ResendOTP:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        purpose:
+          allOf:
+          - $ref: '#/components/schemas/PurposeEnum'
+          default: REGISTRATION
+      required:
+      - email
+    ResendOTPRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        purpose:
+          allOf:
+          - $ref: '#/components/schemas/PurposeEnum'
+          default: REGISTRATION
+      required:
+      - email
+    ResetPassword:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        reset_token:
+          type: string
+      required:
+      - email
+      - reset_token
+    ResetPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        reset_token:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - confirm_password
+      - email
+      - new_password
+      - reset_token
+    RoleEnum:
+      enum:
+      - USER
+      - ADMIN
+      type: string
+      description: |-
+        * `USER` - User
+        * `ADMIN` - Admin
+    Slot:
+      type: object
+      description: Public/read representation of a slot.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        date:
+          type: string
+          format: date
+          readOnly: true
+        start_time:
+          type: string
+          format: time
+          readOnly: true
+        end_time:
+          type: string
+          format: time
+          readOnly: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        status:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - date
+      - end_time
+      - id
+      - price
+      - start_time
+      - status
+      - updated_at
+    SlotCopyNextDay:
+      type: object
+      description: Copy the previous day's slot layout into the requested date.
+      properties:
+        date:
+          type: string
+          format: date
+          description: Target date; slots are copied from the previous day.
+      required:
+      - date
+    SlotCopyNextDayRequest:
+      type: object
+      description: Copy the previous day's slot layout into the requested date.
+      properties:
+        date:
+          type: string
+          format: date
+          description: Target date; slots are copied from the previous day.
+      required:
+      - date
+    SlotDeleteData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      required:
+      - id
+    SlotDeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+          default: Slot deleted successfully.
+        data:
+          $ref: '#/components/schemas/SlotDeleteData'
+      required:
+      - data
+    SlotGenerate:
+      type: object
+      description: Generate whole-hour slots for a date range from the futsal opening
+        hours.
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+      required:
+      - start_date
+    SlotGenerateRequest:
+      type: object
+      description: Generate whole-hour slots for a date range from the futsal opening
+        hours.
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+      required:
+      - start_date
+    SlotStatusEnum:
+      enum:
+      - AVAILABLE
+      - BOOKED
+      - BLOCKED
+      type: string
+      description: |-
+        * `AVAILABLE` - Available
+        * `BOOKED` - Booked
+        * `BLOCKED` - Blocked
+    SlotWrite:
+      type: object
+      description: |-
+        Admin slot create/update.
+
+        The futsal is implicit (single-venue system) and slots run on whole hours,
+        e.g. 07:00 - 08:00.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+          description: Overrides futsal price when set.
+        status:
+          $ref: '#/components/schemas/SlotStatusEnum'
+      required:
+      - date
+      - end_time
+      - id
+      - start_time
+    SlotWriteRequest:
+      type: object
+      description: |-
+        Admin slot create/update.
+
+        The futsal is implicit (single-venue system) and slots run on whole hours,
+        e.g. 07:00 - 08:00.
+      properties:
+        date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+          description: Overrides futsal price when set.
+        status:
+          $ref: '#/components/schemas/SlotStatusEnum'
+      required:
+      - date
+      - end_time
+      - start_time
+    Status220Enum:
+      enum:
+      - AVAILABLE
+      - BLOCKED
+      type: string
+      description: |-
+        * `AVAILABLE` - AVAILABLE
+        * `BLOCKED` - BLOCKED
+    Testimonial:
+      type: object
+      description: Serializer for testimonial display (read-only).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          description: Customer's full name
+          maxLength: 200
+        title:
+          type: string
+          description: Job title or role (e.g., 'Regular Player', 'Tournament Organizer')
+          maxLength: 200
+        image_url:
+          type: string
+          readOnly: true
+        content:
+          type: string
+          description: Testimonial content/review
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content
+      - created_at
+      - full_name
+      - id
+      - image_url
+      - title
+      - updated_at
+    TestimonialUpload:
+      type: object
+      description: Serializer for creating/updating testimonials with image upload.
+      properties:
+        full_name:
+          type: string
+          description: Customer's full name
+          maxLength: 200
+        title:
+          type: string
+          description: Job title or role (e.g., 'Regular Player', 'Tournament Organizer')
+          maxLength: 200
+        image:
+          type: string
+          format: uri
+          nullable: true
+          description: Customer photo
+        content:
+          type: string
+          description: Testimonial content/review
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+      required:
+      - content
+      - full_name
+      - title
+    TestimonialUploadRequest:
+      type: object
+      description: Serializer for creating/updating testimonials with image upload.
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          description: Customer's full name
+          maxLength: 200
+        title:
+          type: string
+          minLength: 1
+          description: Job title or role (e.g., 'Regular Player', 'Tournament Organizer')
+          maxLength: 200
+        image:
+          type: string
+          format: binary
+          nullable: true
+          description: Customer photo
+        content:
+          type: string
+          minLength: 1
+          description: Testimonial content/review
+        is_active:
+          type: boolean
+          description: Show on website
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Display order (lower numbers first)
+      required:
+      - content
+      - full_name
+      - title
+    UnblockDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+      required:
+      - date
+    UnblockDayRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+      required:
+      - date
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 20
+        profile_image:
+          type: string
+          nullable: true
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        is_verified:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - is_verified
+      - phone_number
+      - profile_image
+      - role
+    VerifyForgotPasswordOTP:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+          pattern: ^\d{6}$
+      required:
+      - email
+      - otp
+    VerifyForgotPasswordOTPRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        otp:
+          type: string
+          minLength: 1
+          pattern: ^\d{6}$
+      required:
+      - email
+      - otp
+    VerifyOTP:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+          pattern: ^\d{6}$
+        purpose:
+          allOf:
+          - $ref: '#/components/schemas/PurposeEnum'
+          default: REGISTRATION
+      required:
+      - email
+      - otp
+    VerifyOTPRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        otp:
+          type: string
+          minLength: 1
+          pattern: ^\d{6}$
+        purpose:
+          allOf:
+          - $ref: '#/components/schemas/PurposeEnum'
+          default: REGISTRATION
+      required:
+      - email
+      - otp
+    WhyUsSection:
+      type: object
+      description: Serializer for why us section display.
+      properties:
+        title:
+          type: string
+          description: Why us section title
+          maxLength: 200
+        description:
+          type: string
+          description: Why us description text
+        features:
+          description: Array of feature objects with iconcode, title, and description
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - description
+      - title
+      - updated_at
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+tags:
+- name: auth
+  description: Registration, OTP, login, tokens, passwords
+- name: users
+  description: User profile
+- name: futsal
+  description: Futsal details (single venue)
+- name: slots
+  description: Date-wise slot availability (read-only)
+- name: bookings
+  description: User bookings, cancel and reschedule
+- name: contact
+  description: Contact us
+- name: testimonials
+  description: Customer testimonials and reviews
+- name: admin-profile
+  description: Admin profile and password
+- name: admin-futsal
+  description: Futsal configuration (pricing, hours)
+- name: admin-slots
+  description: Slot management and bulk generation
+- name: admin-bookings
+  description: Booking management, cancel, reschedule, complete
+- name: admin-notifications
+  description: In-app booking notifications for administrators
+- name: analytics
+  description: Analytics dashboard reporting
+- name: dashboard
+  description: Today's operational dashboard
+- name: admin-contact
+  description: Contact message triage
+- name: admin-reminders
+  description: Reminder history and manual sending
+- name: admin-media
+  description: Futsal image/video uploads (Cloudinary)
+- name: internal
+  description: Internal cron/scheduler endpoints
