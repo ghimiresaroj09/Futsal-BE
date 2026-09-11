@@ -1,7 +1,7 @@
 """CMS views for testimonials."""
 from __future__ import annotations
 
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -689,21 +689,8 @@ class GalleryHighlightViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     
     @extend_schema(
         summary="Upload gallery highlight video",
-        description="Upload a new highlight video to Cloudinary. Admin only. For tags field, use JSON array format: [\"tag1\", \"tag2\"]",
+        description="Upload a new highlight video to Cloudinary. Admin only. Tags is a plain text field (e.g., 'goal, highlight, tournament')",
         request=GalleryHighlightUploadSerializer,
-        examples=[
-            OpenApiExample(
-                'Upload with tags',
-                description='Example of uploading a highlight with tags',
-                value={
-                    'title': 'Amazing Goals Compilation',
-                    'tags': ['goal', 'highlight', 'tournament'],
-                    'is_active': True,
-                    'sort_order': 0
-                },
-                request_only=True,
-            )
-        ],
         responses={201: GalleryHighlightSerializer}
     )
     def create(self, request, *args, **kwargs):

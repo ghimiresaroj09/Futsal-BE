@@ -105,7 +105,7 @@ tags: goal, highlight, tournament
     "title": "Amazing Goal Compilation",
     "video_url": "https://res.cloudinary.com/.../highlights/video.mp4",
     "thumbnail_url": "https://res.cloudinary.com/.../highlights/thumbnails/thumb.jpg",
-    "tags": ["goal", "skills", "tournament"],
+    "tags": "goal, skills, tournament",
     "is_active": true,
     "sort_order": 0,
     "created_at": "2026-09-10T10:30:00Z",
@@ -319,7 +319,7 @@ const formData = new FormData();
 formData.append('title', 'New Highlight');
 formData.append('video', videoFile);
 formData.append('thumbnail', thumbnailFile);
-formData.append('tags', JSON.stringify(['goal', 'tournament']));
+formData.append('tags', 'goal, tournament');
 formData.append('is_active', 'true');
 
 const response = await fetch('/api/v1/cms/gallery/highlights/', {
@@ -363,7 +363,7 @@ Gallery highlights are manageable via Django Admin at `/admin/cms/galleryhighlig
 ## Technical Notes
 
 1. **Video Format Support**: Cloudinary supports MP4, WebM, OGG, MOV, and other common video formats
-2. **Tags Implementation**: Stored as JSONField array, validated to contain only non-empty strings
+2. **Tags Implementation**: Stored as TextField (plain text string)
 3. **Thumbnail Optional**: Videos can be uploaded without thumbnails; Cloudinary can auto-generate if needed
 4. **No Category**: Unlike gallery images, highlights use tags instead of categories for flexible filtering
 5. **Ordering**: Default order is `sort_order` ascending, then `created_at` descending (newest first)
@@ -415,7 +415,7 @@ CREATE INDEX idx_highlight_active_sort ON cms_gallery_highlight(is_active, sort_
 - [ ] List all highlights (public - active only)
 - [ ] List all highlights (admin - including inactive)
 - [ ] Search by title
-- [ ] Search by tag
+- [ ] Search by tag text
 - [ ] Filter by is_active
 - [ ] Update title and tags
 - [ ] Replace video file
@@ -423,8 +423,7 @@ CREATE INDEX idx_highlight_active_sort ON cms_gallery_highlight(is_active, sort_
 - [ ] Deactivate highlight
 - [ ] Delete highlight
 - [ ] Verify Cloudinary paths correct
-- [ ] Test tag validation (must be array of strings)
-- [ ] Test empty tag rejection
+- [ ] Test tags as plain text
 - [ ] Test negative sort_order rejection
 
 ---

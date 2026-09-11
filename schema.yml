@@ -2335,8 +2335,8 @@ paths:
           description: ''
     post:
       operationId: cms_gallery_highlights_create
-      description: 'Upload a new highlight video to Cloudinary. Admin only. For tags
-        field, use JSON array format: ["tag1", "tag2"]'
+      description: Upload a new highlight video to Cloudinary. Admin only. Tags is
+        a plain text field (e.g., 'goal, highlight, tournament')
       summary: Upload gallery highlight video
       tags:
       - cms
@@ -2351,18 +2351,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GalleryHighlightUploadRequest'
-            examples:
-              UploadWithTags:
-                value:
-                  title: Amazing Goals Compilation
-                  tags:
-                  - goal
-                  - highlight
-                  - tournament
-                  is_active: true
-                  sort_order: 0
-                summary: Upload with tags
-                description: Example of uploading a highlight with tags
         required: true
       security:
       - jwtAuth: []
