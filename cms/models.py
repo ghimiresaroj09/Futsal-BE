@@ -16,6 +16,7 @@ class HeroSection(SingletonModel):
     description = models.TextField(help_text="Hero description text")
     image = models.ImageField(
         upload_to="hero/",
+        storage=image_storage,
         help_text="Hero background image",
         null=True,
         blank=True
@@ -46,6 +47,7 @@ class CarouselImage(BaseModel):
     
     image = models.ImageField(
         upload_to="carousel/",
+        storage=image_storage,
         help_text="Carousel image"
     )
     alt_text = models.CharField(
@@ -163,6 +165,7 @@ class GalleryImage(BaseModel):
     )
     image = models.ImageField(
         upload_to="gallery/",
+        storage=image_storage,
         help_text="Gallery image"
     )
     alt_text = models.CharField(
@@ -251,6 +254,7 @@ class Testimonial(BaseModel):
     title = models.CharField(max_length=200, help_text="Job title or role (e.g., 'Regular Player', 'Tournament Organizer')")
     image = models.ImageField(
         upload_to="testimonials/",
+        storage=image_storage,
         help_text="Customer photo",
         null=True,
         blank=True
