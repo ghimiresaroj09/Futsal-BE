@@ -85,9 +85,18 @@ Upload a new highlight video. **Admin only**.
 title: Amazing Goal Compilation
 video: [video file]
 thumbnail: [image file] (optional)
-tags: ["goal", "skills", "tournament"]
+tags: ["goal", "skills", "tournament"]  ← Must be JSON string
 is_active: true
 sort_order: 0
+```
+
+**Important**: The `tags` field must be a JSON-formatted string when using multipart/form-data:
+- ✅ Correct: `["goal", "skills"]`
+- ❌ Wrong: `goal,skills`
+
+**Example in Swagger UI**:
+```
+tags: ["goal", "highlight", "tournament"]
 ```
 
 **Response:** `201 Created`
@@ -243,7 +252,7 @@ Thumbnails are stored at: `highlights/thumbnails/{filename}`
 
 ## Usage Examples
 
-### Example 1: Upload Highlight with Tags
+### Example 1: Upload Highlight with Tags (multipart/form-data)
 ```bash
 curl -X POST "http://localhost:8000/api/v1/cms/gallery/highlights/" \
   -H "Authorization: Bearer {admin_token}" \
@@ -253,6 +262,30 @@ curl -X POST "http://localhost:8000/api/v1/cms/gallery/highlights/" \
   -F 'tags=["save", "goalkeeper", "2026"]' \
   -F "is_active=true" \
   -F "sort_order=0"
+```
+
+**Important**: When using multipart/form-data, the `tags` field must be a JSON string:
+- ✅ Correct: `'tags=["save", "goalkeeper"]'`
+- ❌ Wrong: `'tags=save,goalkeeper'`
+
+### Example 1b: Upload Highlight with Tags (JSON)
+```bash
+curl -X POST "http://localhost:8000/api/v1/cms/gallery/highlights/" \
+  -H "Authorization: Bearer {admin_token}" \
+  -H "Content-Type: multipart/form-data" \
+  -F "title=Best Saves 2026" \
+  -F "video=@saves.mp4" \
+  -F 'tags=["save", "goalkeeper", "2026"]'
+```
+
+When using JSON (not multipart), tags is a direct array:
+```bash
+curl -X PATCH "http://localhost:8000/api/v1/cms/gallery/highlights/{id}/" \
+  -H "Authorization: Bearer {admin_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tags": ["save", "goalkeeper", "2026"]
+  }'
 ```
 
 ### Example 2: Filter Active Highlights
