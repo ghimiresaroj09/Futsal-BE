@@ -353,6 +353,28 @@ class GalleryCategoryCreateUpdateSerializer(serializers.ModelSerializer):
         if value < 0:
             raise serializers.ValidationError("Sort order cannot be negative.")
         return value
+    
+    def save(self, **kwargs):
+        """Override save to regenerate slug when name changes."""
+        from django.utils.text import slugify
+        
+        # If updating and name has changed, regenerate slug
+        if self.instance and 'name' in self.validated_data:
+            new_name = self.validated_data['name']
+            if new_name != self.instance.name:
+                # Generate slug from new name
+                base_slug = slugify(new_name)
+                slug = base_slug
+                counter = 1
+                
+                # Ensure slug is unique
+                while GalleryCategory.objects.filter(slug=slug).exclude(id=self.instance.id).exists():
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                
+                self.validated_data['slug'] = slug
+        
+        return super().save(**kwargs)
 
 
 
@@ -485,6 +507,14 @@ class GalleryHighlightUploadSerializer(serializers.ModelSerializer):
     
     def validate_tags(self, value):
         """Validate tags is a list of strings."""
+        # Handle both JSON string (from multipart/form-data) and list (from JSON)
+        if isinstance(value, str):
+            import json
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError("Value must be valid JSON.")
+        
         if value is not None:
             if not isinstance(value, list):
                 raise serializers.ValidationError("Tags must be an array.")

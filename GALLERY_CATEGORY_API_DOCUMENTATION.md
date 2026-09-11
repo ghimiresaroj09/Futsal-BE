@@ -241,7 +241,7 @@ PATCH /api/v1/cms/gallery/category/{id}/
 
 **Content-Type:** `application/json`
 
-**Description:** Update gallery category details. Only include fields you want to change.
+**Description:** Update gallery category details. Only include fields you want to change. **Note:** When you update the `name` field, the `slug` is automatically regenerated to match the new name.
 
 **Request Headers:**
 ```
@@ -649,6 +649,7 @@ export default {
 - URL-friendly (lowercase, hyphens)
 - Unique
 - Read-only (cannot be manually set)
+- **Automatically updated when name changes**
 
 ### Sort Order
 - Optional, defaults to 0
