@@ -208,10 +208,10 @@ class GalleryHighlight(BaseModel):
         upload_to="highlights/",
         help_text="Highlight video (Cloudinary)"
     )
-    tags = models.JSONField(
-        default=list,
+    tags = models.TextField(
         blank=True,
-        help_text="Array of tag strings (e.g., ['goal', 'save', 'skills'])"
+        default="",
+        help_text="Tags for the video (e.g., 'goal, save, skills')"
     )
     thumbnail = models.ImageField(
         upload_to="highlights/thumbnails/",
