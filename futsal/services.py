@@ -20,6 +20,13 @@ def generate_slots_for_date(*, date: dt.date, futsal: Futsal | None = None) -> l
     the same start time are left untouched, so this is safe to re-run.
     """
     futsal = futsal or Futsal.objects.get_solo()
+    
+    # Validate opening and closing times are set
+    if not futsal.opening_time or not futsal.closing_time:
+        error_msg = "Futsal opening_time and closing_time must be configured before generating slots."
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+    
     if FutsalClosure.objects.filter(futsal=futsal, date=date).exists():
         logger.info("Skipping slot generation for closed date=%s", date)
         return []
