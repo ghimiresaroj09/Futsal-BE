@@ -17,6 +17,7 @@ from cms.models import (
     GalleryImage,
     GalleryHighlight,
     AboutHeroSection,
+    AboutStory,
 )
 from cms.serializers import (
     HeroSectionSerializer,
@@ -37,6 +38,8 @@ from cms.serializers import (
     GalleryHighlightUploadSerializer,
     AboutHeroSectionSerializer,
     AboutHeroSectionUpdateSerializer,
+    AboutStorySerializer,
+    AboutStoryUpdateSerializer,
 )
 from common.mixins import EnvelopeMixin
 from common.permissions import IsAdmin
@@ -792,4 +795,50 @@ class AboutHeroSectionView(APIView):
         return success_response(
             data=AboutHeroSectionSerializer(about_hero).data,
             message="About hero section updated successfully."
+        )
+
+
+@extend_schema(tags=["cms"])
+class AboutStoryView(APIView):
+    """Manage about page story section (singleton)."""
+    
+    parser_classes = [JSONParser]
+    
+    def get_permissions(self):
+        """Public can view, only admins can update."""
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+    
+    @extend_schema(
+        summary="Get about story section content",
+        description="Returns the about page story section content including title, description, and journey array.",
+        responses={200: AboutStorySerializer}
+    )
+    def get(self, request):
+        """Get about story section content."""
+        about_story = AboutStory.get_solo()
+        serializer = AboutStorySerializer(about_story)
+        return success_response(
+            data=serializer.data,
+            message="About story section retrieved successfully."
+        )
+    
+    @extend_schema(
+        summary="Update about story section content",
+        description="Update about story section content. Journey is an array of objects with year, title, description, and image (URL). Admin only.",
+        request=AboutStoryUpdateSerializer,
+        responses={200: AboutStorySerializer}
+    )
+    def patch(self, request):
+        """Update about story section content."""
+        about_story = AboutStory.get_solo()
+        serializer = AboutStoryUpdateSerializer(about_story, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # Return updated data with display serializer
+        return success_response(
+            data=AboutStorySerializer(about_story).data,
+            message="About story section updated successfully."
         )

@@ -12,6 +12,7 @@ from cms.models import (
     GalleryImage,
     GalleryHighlight,
     AboutHeroSection,
+    AboutStory,
 )
 
 
@@ -230,6 +231,23 @@ class AboutHeroSectionAdmin(SingletonModelAdmin):
         }),
         ("Statistics", {
             "fields": ("years_in_game", "matches_hosted", "tournaments_run", "players_in_community")
+        }),
+        ("Metadata", {
+            "fields": ("updated_at",),
+            "classes": ("collapse",)
+        }),
+    )
+    
+    readonly_fields = ["updated_at"]
+
+
+@admin.register(AboutStory)
+class AboutStoryAdmin(SingletonModelAdmin):
+    """Admin interface for about story section."""
+    
+    fieldsets = (
+        ("Content", {
+            "fields": ("title", "description", "journey")
         }),
         ("Metadata", {
             "fields": ("updated_at",),

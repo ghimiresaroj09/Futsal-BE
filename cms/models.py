@@ -300,3 +300,23 @@ class AboutHeroSection(SingletonModel):
     
     def __str__(self):
         return "About Page Hero Section"
+
+
+class AboutStory(SingletonModel):
+    """About page story section content (singleton)."""
+    
+    title = models.CharField(max_length=200, help_text="Story section title")
+    description = models.TextField(help_text="Story description text")
+    journey = models.JSONField(
+        default=list,
+        help_text="Array of journey milestones with year, title, description, and image",
+        blank=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "About Story Section"
+        verbose_name_plural = "About Story Section"
+    
+    def __str__(self):
+        return "About Page Story Section"
