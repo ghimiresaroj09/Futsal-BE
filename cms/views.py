@@ -946,22 +946,27 @@ class AboutCommunityView(APIView):
         storage = image_storage()
         
         # Handle features (already parsed as JSON array)
-        if 'features' in data and isinstance(data['features'], str):
-            try:
-                data['features'] = json.loads(data['features'])
-            except json.JSONDecodeError:
-                pass
+        if 'features' in data:
+            if isinstance(data['features'], str):
+                try:
+                    data['features'] = json.loads(data['features'])
+                except json.JSONDecodeError:
+                    # If it's not valid JSON, treat as single item
+                    data['features'] = [data['features']]
         
         # Handle rules (already parsed as JSON array)
-        if 'rules' in data and isinstance(data['rules'], str):
-            try:
-                data['rules'] = json.loads(data['rules'])
-            except json.JSONDecodeError:
-                pass
+        if 'rules' in data:
+            if isinstance(data['rules'], str):
+                try:
+                    data['rules'] = json.loads(data['rules'])
+                except json.JSONDecodeError:
+                    # Remove invalid rules if can't parse
+                    del data['rules']
         
         # Handle team array with file uploads
         team_data = []
         team_index = 0
+        has_team_data = False
         
         while True:
             # Check if team[index] exists in the request
@@ -969,9 +974,10 @@ class AboutCommunityView(APIView):
             role_key = f'team[{team_index}][role]'
             image_key = f'team[{team_index}][image]'
             
-            if name_key not in data:
+            if name_key not in data and name_key not in request.data:
                 break
             
+            has_team_data = True
             team_member = {
                 'name': data.get(name_key, ''),
                 'role': data.get(role_key, ''),
@@ -993,13 +999,17 @@ class AboutCommunityView(APIView):
             team_index += 1
         
         # If we found team data, use it
-        if team_data:
+        if has_team_data:
             data['team'] = team_data
         
-        # Remove the individual team[x][field] keys
-        keys_to_remove = [key for key in data.keys() if key.startswith('team[')]
+        # Remove the individual team[x][field] keys and 'team' key if it exists as string
+        keys_to_remove = [key for key in data.keys() if key.startswith('team[') or key == 'team']
         for key in keys_to_remove:
             del data[key]
+        
+        # Re-add team data after cleanup
+        if has_team_data:
+            data['team'] = team_data
         
         serializer = AboutCommunityUpdateSerializer(about_community, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
