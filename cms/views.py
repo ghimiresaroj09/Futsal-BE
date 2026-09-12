@@ -884,8 +884,69 @@ class AboutCommunityView(APIView):
     )
     def patch(self, request):
         """Update about community section content."""
+        import json
+        from common.storages import image_storage
+        
         about_community = AboutCommunity.get_solo()
-        serializer = AboutCommunityUpdateSerializer(about_community, data=request.data, partial=True)
+        data = request.data.copy()
+        
+        # Handle features (already parsed as JSON array)
+        if 'features' in data and isinstance(data['features'], str):
+            try:
+                data['features'] = json.loads(data['features'])
+            except json.JSONDecodeError:
+                pass
+        
+        # Handle rules (already parsed as JSON array)
+        if 'rules' in data and isinstance(data['rules'], str):
+            try:
+                data['rules'] = json.loads(data['rules'])
+            except json.JSONDecodeError:
+                pass
+        
+        # Handle team array with file uploads
+        team_data = []
+        team_index = 0
+        
+        while True:
+            # Check if team[index] exists in the request
+            name_key = f'team[{team_index}][name]'
+            role_key = f'team[{team_index}][role]'
+            image_key = f'team[{team_index}][image]'
+            
+            if name_key not in data:
+                break
+            
+            team_member = {
+                'name': data.get(name_key, ''),
+                'role': data.get(role_key, ''),
+                'image': ''
+            }
+            
+            # Handle image upload for this team member
+            if image_key in request.FILES:
+                image_file = request.FILES[image_key]
+                # Upload to Cloudinary
+                upload_path = f"about/community/team/{image_file.name}"
+                saved_path = image_storage.save(upload_path, image_file)
+                team_member['image'] = image_storage.url(saved_path)
+            elif image_key in data and isinstance(data[image_key], str):
+                # Use existing URL if provided as string
+                team_member['image'] = data[image_key]
+            
+            team_data.append(team_member)
+            team_index += 1
+        
+        # If we found team data, use it
+        if team_data:
+            data['team'] = team_data
+        
+        # Remove the individual team[x][field] keys
+        keys_to_remove = [key for key in data.keys() if key.startswith('team[')]
+        for key in keys_to_remove:
+            del data[key]
+        
+        serializer = AboutCommunityUpdateSerializer(about_community, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
