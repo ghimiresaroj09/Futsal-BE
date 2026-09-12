@@ -52,7 +52,7 @@ from common.permissions import IsAdmin
 from common.responses import success_response
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-homepage"])
 class HeroSectionView(APIView):
     """Manage homepage hero section (singleton)."""
     
@@ -98,7 +98,7 @@ class HeroSectionView(APIView):
         )
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-homepage"])
 class CarouselImageViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage homepage carousel images."""
     
@@ -214,7 +214,7 @@ class CarouselImageViewSet(EnvelopeMixin, viewsets.ModelViewSet):
         )
 
 
-@extend_schema(tags=["testimonials"])
+@extend_schema(tags=["cms-testimonials"])
 class TestimonialViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage customer testimonials."""
     
@@ -331,7 +331,7 @@ class TestimonialViewSet(EnvelopeMixin, viewsets.ModelViewSet):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-homepage"])
 class ArenaSectionView(APIView):
     """Manage homepage arena section (singleton)."""
     
@@ -378,7 +378,7 @@ class ArenaSectionView(APIView):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-homepage"])
 class WhyUsSectionView(APIView):
     """Manage homepage why us section (singleton)."""
     
@@ -425,7 +425,7 @@ class WhyUsSectionView(APIView):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-gallery"])
 class GalleryCategoryViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage gallery categories."""
     
@@ -535,7 +535,7 @@ class GalleryCategoryViewSet(EnvelopeMixin, viewsets.ModelViewSet):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-gallery"])
 class GalleryImageViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage gallery images."""
     
@@ -648,7 +648,7 @@ class GalleryImageViewSet(EnvelopeMixin, viewsets.ModelViewSet):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-gallery"])
 class GalleryHighlightViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage gallery highlight videos."""
     
@@ -758,7 +758,7 @@ class GalleryHighlightViewSet(EnvelopeMixin, viewsets.ModelViewSet):
         )
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-about"])
 class AboutHeroSectionView(APIView):
     """Manage about page hero section (singleton)."""
     
@@ -804,7 +804,7 @@ class AboutHeroSectionView(APIView):
         )
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-about"])
 class AboutStoryView(APIView):
     """Manage about page story section (singleton)."""
     
@@ -850,7 +850,7 @@ class AboutStoryView(APIView):
         )
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-about"])
 class AboutCommunityView(APIView):
     """Manage about page community section (singleton)."""
     
@@ -896,7 +896,7 @@ class AboutCommunityView(APIView):
         )
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-bookings"])
 class BookingsHeroSectionView(APIView):
     """Manage bookings page hero section (singleton)."""
     
