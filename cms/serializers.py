@@ -211,6 +211,10 @@ class ArenaSectionSerializer(serializers.ModelSerializer):
 class ArenaSectionUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating arena section."""
     
+    # Mark features as optional to bypass DRF's JSONField validation
+    # We'll handle parsing and validation in the view
+    features = serializers.JSONField(required=False, allow_null=True)
+    
     class Meta:
         model = ArenaSection
         fields = [
@@ -218,26 +222,15 @@ class ArenaSectionUpdateSerializer(serializers.ModelSerializer):
             "description",
             "features",
         ]
+        extra_kwargs = {
+            'features': {'required': False, 'allow_null': True},
+        }
     
     def validate_title(self, value):
         """Validate title is not empty."""
         if value is not None and not value.strip():
             raise serializers.ValidationError("Title cannot be empty.")
         return value.strip() if value else value
-    
-    def validate_features(self, value):
-        """Validate features is a list of strings."""
-        if value is not None:
-            if not isinstance(value, list):
-                raise serializers.ValidationError("Features must be an array.")
-            
-            for feature in value:
-                if not isinstance(feature, str):
-                    raise serializers.ValidationError("Each feature must be a string.")
-                if not feature.strip():
-                    raise serializers.ValidationError("Features cannot contain empty strings.")
-        
-        return value
 
 
 
@@ -258,6 +251,10 @@ class WhyUsSectionSerializer(serializers.ModelSerializer):
 class WhyUsSectionUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating why us section."""
     
+    # Mark features as optional to bypass DRF's JSONField validation
+    # We'll handle parsing and validation in the view
+    features = serializers.JSONField(required=False, allow_null=True)
+    
     class Meta:
         model = WhyUsSection
         fields = [
@@ -265,44 +262,15 @@ class WhyUsSectionUpdateSerializer(serializers.ModelSerializer):
             "description",
             "features",
         ]
+        extra_kwargs = {
+            'features': {'required': False, 'allow_null': True},
+        }
     
     def validate_title(self, value):
         """Validate title is not empty."""
         if value is not None and not value.strip():
             raise serializers.ValidationError("Title cannot be empty.")
         return value.strip() if value else value
-    
-    def validate_features(self, value):
-        """Validate features is a list of objects with iconcode, title, and description."""
-        if value is not None:
-            if not isinstance(value, list):
-                raise serializers.ValidationError("Features must be an array.")
-            
-            for idx, feature in enumerate(value):
-                if not isinstance(feature, dict):
-                    raise serializers.ValidationError(
-                        f"Feature at index {idx} must be an object."
-                    )
-                
-                # Check required fields
-                required_fields = ["iconcode", "title", "description"]
-                for field in required_fields:
-                    if field not in feature:
-                        raise serializers.ValidationError(
-                            f"Feature at index {idx} is missing required field: '{field}'."
-                        )
-                    
-                    if not isinstance(feature[field], str):
-                        raise serializers.ValidationError(
-                            f"Feature at index {idx}: '{field}' must be a string."
-                        )
-                    
-                    if not feature[field].strip():
-                        raise serializers.ValidationError(
-                            f"Feature at index {idx}: '{field}' cannot be empty."
-                        )
-        
-        return value
 
 
 
