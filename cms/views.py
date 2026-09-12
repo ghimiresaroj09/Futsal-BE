@@ -87,20 +87,60 @@ class HeroSectionView(APIView):
     def patch(self, request):
         """Update hero section content."""
         import json
+        from rest_framework.exceptions import ValidationError
         
         hero = HeroSection.get_solo()
         data = request.data.copy()
         
-        # Parse stats if it's a JSON string
-        if 'stats' in data and isinstance(data['stats'], str):
-            try:
-                data['stats'] = json.loads(data['stats'])
-            except (json.JSONDecodeError, ValueError):
-                pass  # Let serializer validation handle it
+        # Extract and parse stats before serializer validation
+        stats_data = None
+        if 'stats' in data:
+            stats_raw = data['stats']
+            
+            # Parse if it's a JSON string
+            if isinstance(stats_raw, str):
+                try:
+                    stats_data = json.loads(stats_raw)
+                except (json.JSONDecodeError, ValueError):
+                    raise ValidationError({"stats": ["Invalid JSON format for stats."]})
+            else:
+                stats_data = stats_raw
+            
+            # Validate stats structure
+            if stats_data is not None:
+                if not isinstance(stats_data, list):
+                    raise ValidationError({"stats": ["Stats must be an array."]})
+                
+                if len(stats_data) != 3:
+                    raise ValidationError({"stats": ["Stats must contain exactly 3 items."]})
+                
+                for idx, stat in enumerate(stats_data):
+                    if not isinstance(stat, dict):
+                        raise ValidationError({"stats": [f"Stat at index {idx} must be an object."]})
+                    
+                    if 'label' not in stat or 'value' not in stat:
+                        raise ValidationError({"stats": [f"Stat at index {idx} must have 'label' and 'value' fields."]})
+                    
+                    if not str(stat['label']).strip() or not str(stat['value']).strip():
+                        raise ValidationError({"stats": [f"Stat at index {idx}: 'label' and 'value' cannot be empty."]})
+            
+            # Remove stats from data before serializer validation
+            del data['stats']
         
+        # Validate and save other fields
         serializer = HeroSectionUpdateSerializer(hero, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
+        # Manually update stats if provided
+        if stats_data:
+            hero.stat_open_label = stats_data[0]['label']
+            hero.stat_open_value = stats_data[0]['value']
+            hero.stat_matches_label = stats_data[1]['label']
+            hero.stat_matches_value = stats_data[1]['value']
+            hero.stat_courts_label = stats_data[2]['label']
+            hero.stat_courts_value = stats_data[2]['value']
+            hero.save()
         
         # Return updated data with display serializer
         return success_response(
