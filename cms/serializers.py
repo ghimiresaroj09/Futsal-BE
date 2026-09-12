@@ -725,6 +725,11 @@ class AboutCommunitySerializer(serializers.ModelSerializer):
 class AboutCommunityUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating about community section."""
     
+    # Override to accept any type during initial validation
+    features = serializers.JSONField(required=False)
+    team = serializers.JSONField(required=False)
+    rules = serializers.JSONField(required=False)
+    
     class Meta:
         model = AboutCommunity
         fields = [
@@ -742,9 +747,40 @@ class AboutCommunityUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Title cannot be empty.")
         return value.strip() if value else value
     
+    def to_internal_value(self, data):
+        """Override to handle string JSON fields before validation."""
+        import json
+        
+        # Create a mutable copy
+        data = data.copy() if hasattr(data, 'copy') else dict(data)
+        
+        # Parse features if it's a string
+        if 'features' in data and isinstance(data.get('features'), str):
+            try:
+                data['features'] = json.loads(data['features'])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        
+        # Parse rules if it's a string
+        if 'rules' in data and isinstance(data.get('rules'), str):
+            try:
+                data['rules'] = json.loads(data['rules'])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        
+        # Handle team - if it's a string or dict from multipart parsing, ignore it
+        # The view will handle team[x][field] parsing
+        if 'team' in data:
+            team_value = data.get('team')
+            if isinstance(team_value, str) or isinstance(team_value, dict):
+                # Remove it, view will reconstruct from team[x][field]
+                data['team'] = []
+        
+        return super().to_internal_value(data)
+    
     def validate_features(self, value):
         """Validate features is an array of strings."""
-        if value is not None:
+        if value is not None and value != []:
             if not isinstance(value, list):
                 raise serializers.ValidationError("Features must be an array.")
             
@@ -762,7 +798,7 @@ class AboutCommunityUpdateSerializer(serializers.ModelSerializer):
     
     def validate_team(self, value):
         """Validate team is an array of objects with name, role, and image."""
-        if value is not None:
+        if value is not None and value != []:
             if not isinstance(value, list):
                 raise serializers.ValidationError("Team must be an array.")
             
@@ -794,7 +830,7 @@ class AboutCommunityUpdateSerializer(serializers.ModelSerializer):
     
     def validate_rules(self, value):
         """Validate rules is an array of objects with iconcode, title, and description."""
-        if value is not None:
+        if value is not None and value != []:
             if not isinstance(value, list):
                 raise serializers.ValidationError("Rules must be an array.")
             
