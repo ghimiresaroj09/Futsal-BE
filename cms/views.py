@@ -838,8 +838,57 @@ class AboutStoryView(APIView):
     )
     def patch(self, request):
         """Update about story section content."""
+        import json
+        from common.storages import image_storage
+        
         about_story = AboutStory.get_solo()
-        serializer = AboutStoryUpdateSerializer(about_story, data=request.data, partial=True)
+        data = request.data.copy()
+        
+        # Handle journey array with file uploads
+        journey_data = []
+        journey_index = 0
+        
+        while True:
+            # Check if journey[index] exists in the request
+            year_key = f'journey[{journey_index}][year]'
+            title_key = f'journey[{journey_index}][title]'
+            description_key = f'journey[{journey_index}][description]'
+            image_key = f'journey[{journey_index}][image]'
+            
+            if year_key not in data:
+                break
+            
+            milestone = {
+                'year': data.get(year_key, ''),
+                'title': data.get(title_key, ''),
+                'description': data.get(description_key, ''),
+                'image': ''
+            }
+            
+            # Handle image upload for this milestone
+            if image_key in request.FILES:
+                image_file = request.FILES[image_key]
+                # Upload to Cloudinary
+                upload_path = f"about/story/journey/{image_file.name}"
+                saved_path = image_storage.save(upload_path, image_file)
+                milestone['image'] = image_storage.url(saved_path)
+            elif image_key in data and isinstance(data[image_key], str):
+                # Use existing URL if provided as string
+                milestone['image'] = data[image_key]
+            
+            journey_data.append(milestone)
+            journey_index += 1
+        
+        # If we found journey data, use it
+        if journey_data:
+            data['journey'] = journey_data
+        
+        # Remove the individual journey[x][field] keys
+        keys_to_remove = [key for key in data.keys() if key.startswith('journey[')]
+        for key in keys_to_remove:
+            del data[key]
+        
+        serializer = AboutStoryUpdateSerializer(about_story, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
