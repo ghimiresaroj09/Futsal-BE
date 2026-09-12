@@ -11,6 +11,10 @@ from cms.views import (
     GalleryCategoryViewSet,
     GalleryImageViewSet,
     GalleryHighlightViewSet,
+    AboutHeroSectionView,
+    AboutStoryView,
+    AboutCommunityView,
+    BookingsHeroSectionView,
 )
 
 # Router for collections
@@ -22,8 +26,20 @@ router.register(r'gallery/images', GalleryImageViewSet, basename='gallery-image'
 router.register(r'gallery/highlights', GalleryHighlightViewSet, basename='gallery-highlight')
 
 urlpatterns = [
-    # Hero section
+    # Homepage Hero section
     path("homepage/hero-section/", HeroSectionView.as_view(), name="hero-section"),
+    
+    # About Hero section
+    path("about/hero-section/", AboutHeroSectionView.as_view(), name="about-hero-section"),
+    
+    # About Story section
+    path("about/story/", AboutStoryView.as_view(), name="about-story"),
+    
+    # About Community section
+    path("about/community/", AboutCommunityView.as_view(), name="about-community"),
+    
+    # Bookings Hero section
+    path("bookings/hero-section/", BookingsHeroSectionView.as_view(), name="bookings-hero-section"),
     
     # Arena section
     path("homepage/arena/", ArenaSectionView.as_view(), name="arena-section"),

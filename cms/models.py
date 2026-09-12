@@ -271,3 +271,109 @@ class Testimonial(BaseModel):
     
     def __str__(self):
         return f"{self.full_name} - {self.title}"
+
+
+class AboutHeroSection(SingletonModel):
+    """About page hero section content (singleton)."""
+    
+    title = models.CharField(max_length=200, help_text="About hero section title")
+    description = models.TextField(help_text="About hero description text")
+    image = models.ImageField(
+        upload_to="about/hero/",
+        storage=image_storage,
+        help_text="About hero background image",
+        null=True,
+        blank=True
+    )
+    
+    # Stats
+    years_in_game = models.IntegerField(default=0, help_text="Years in the game")
+    matches_hosted = models.IntegerField(default=0, help_text="Matches hosted")
+    tournaments_run = models.IntegerField(default=0, help_text="Tournaments run")
+    players_in_community = models.IntegerField(default=0, help_text="Players in the community")
+    
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "About Hero Section"
+        verbose_name_plural = "About Hero Section"
+    
+    def __str__(self):
+        return "About Page Hero Section"
+
+
+class AboutStory(SingletonModel):
+    """About page story section content (singleton)."""
+    
+    title = models.CharField(max_length=200, help_text="Story section title")
+    description = models.TextField(help_text="Story description text")
+    journey = models.JSONField(
+        default=list,
+        help_text="Array of journey milestones with year, title, description, and image",
+        blank=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "About Story Section"
+        verbose_name_plural = "About Story Section"
+    
+    def __str__(self):
+        return "About Page Story Section"
+
+
+class AboutCommunity(SingletonModel):
+    """About page community section content (singleton)."""
+    
+    title = models.CharField(max_length=200, help_text="Community section title")
+    description = models.TextField(help_text="Community description text")
+    features = models.JSONField(
+        default=list,
+        help_text="Array of feature strings",
+        blank=True
+    )
+    team = models.JSONField(
+        default=list,
+        help_text="Array of team members with name, role, and image",
+        blank=True
+    )
+    rules = models.JSONField(
+        default=list,
+        help_text="Array of rules with iconcode, title, and description",
+        blank=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "About Community Section"
+        verbose_name_plural = "About Community Section"
+    
+    def __str__(self):
+        return "About Page Community Section"
+
+
+class BookingsHeroSection(SingletonModel):
+    """Bookings page hero section content (singleton)."""
+    
+    title = models.CharField(max_length=200, help_text="Bookings hero section title")
+    description = models.TextField(help_text="Bookings hero description text")
+    image = models.ImageField(
+        upload_to="bookings/hero/",
+        storage=image_storage,
+        help_text="Bookings hero background image",
+        null=True,
+        blank=True
+    )
+    info = models.JSONField(
+        default=list,
+        help_text="Array of info items with iconcode, title, and description",
+        blank=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Bookings Hero Section"
+        verbose_name_plural = "Bookings Hero Section"
+    
+    def __str__(self):
+        return "Bookings Page Hero Section"

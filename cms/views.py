@@ -16,6 +16,10 @@ from cms.models import (
     GalleryCategory,
     GalleryImage,
     GalleryHighlight,
+    AboutHeroSection,
+    AboutStory,
+    AboutCommunity,
+    BookingsHeroSection,
 )
 from cms.serializers import (
     HeroSectionSerializer,
@@ -34,13 +38,21 @@ from cms.serializers import (
     GalleryImageUploadSerializer,
     GalleryHighlightSerializer,
     GalleryHighlightUploadSerializer,
+    AboutHeroSectionSerializer,
+    AboutHeroSectionUpdateSerializer,
+    AboutStorySerializer,
+    AboutStoryUpdateSerializer,
+    AboutCommunitySerializer,
+    AboutCommunityUpdateSerializer,
+    BookingsHeroSectionSerializer,
+    BookingsHeroSectionUpdateSerializer,
 )
 from common.mixins import EnvelopeMixin
 from common.permissions import IsAdmin
 from common.responses import success_response
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-homepage"])
 class HeroSectionView(APIView):
     """Manage homepage hero section (singleton)."""
     
@@ -86,7 +98,7 @@ class HeroSectionView(APIView):
         )
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-homepage"])
 class CarouselImageViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage homepage carousel images."""
     
@@ -202,7 +214,7 @@ class CarouselImageViewSet(EnvelopeMixin, viewsets.ModelViewSet):
         )
 
 
-@extend_schema(tags=["testimonials"])
+@extend_schema(tags=["cms-testimonials"])
 class TestimonialViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage customer testimonials."""
     
@@ -319,7 +331,7 @@ class TestimonialViewSet(EnvelopeMixin, viewsets.ModelViewSet):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-homepage"])
 class ArenaSectionView(APIView):
     """Manage homepage arena section (singleton)."""
     
@@ -366,7 +378,7 @@ class ArenaSectionView(APIView):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-homepage"])
 class WhyUsSectionView(APIView):
     """Manage homepage why us section (singleton)."""
     
@@ -413,7 +425,7 @@ class WhyUsSectionView(APIView):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-gallery"])
 class GalleryCategoryViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage gallery categories."""
     
@@ -523,7 +535,7 @@ class GalleryCategoryViewSet(EnvelopeMixin, viewsets.ModelViewSet):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-gallery"])
 class GalleryImageViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage gallery images."""
     
@@ -636,7 +648,7 @@ class GalleryImageViewSet(EnvelopeMixin, viewsets.ModelViewSet):
 
 
 
-@extend_schema(tags=["cms"])
+@extend_schema(tags=["cms-gallery"])
 class GalleryHighlightViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     """Manage gallery highlight videos."""
     
@@ -743,4 +755,188 @@ class GalleryHighlightViewSet(EnvelopeMixin, viewsets.ModelViewSet):
             data={"id": highlight_id, "title": highlight_title},
             message="Gallery highlight deleted successfully.",
             status=status.HTTP_200_OK
+        )
+
+
+@extend_schema(tags=["cms-about"])
+class AboutHeroSectionView(APIView):
+    """Manage about page hero section (singleton)."""
+    
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+    def get_permissions(self):
+        """Public can view, only admins can update."""
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+    
+    @extend_schema(
+        summary="Get about hero section content",
+        description="Returns the about page hero section content including title, description, image, and statistics.",
+        responses={200: AboutHeroSectionSerializer}
+    )
+    def get(self, request):
+        """Get about hero section content."""
+        about_hero = AboutHeroSection.get_solo()
+        serializer = AboutHeroSectionSerializer(about_hero)
+        return success_response(
+            data=serializer.data,
+            message="About hero section retrieved successfully."
+        )
+    
+    @extend_schema(
+        summary="Update about hero section content",
+        description="Update about hero section content. Only include fields you want to change. Admin only.",
+        request=AboutHeroSectionUpdateSerializer,
+        responses={200: AboutHeroSectionSerializer}
+    )
+    def patch(self, request):
+        """Update about hero section content."""
+        about_hero = AboutHeroSection.get_solo()
+        serializer = AboutHeroSectionUpdateSerializer(about_hero, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # Return updated data with display serializer
+        return success_response(
+            data=AboutHeroSectionSerializer(about_hero).data,
+            message="About hero section updated successfully."
+        )
+
+
+@extend_schema(tags=["cms-about"])
+class AboutStoryView(APIView):
+    """Manage about page story section (singleton)."""
+    
+    parser_classes = [JSONParser]
+    
+    def get_permissions(self):
+        """Public can view, only admins can update."""
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+    
+    @extend_schema(
+        summary="Get about story section content",
+        description="Returns the about page story section content including title, description, and journey array.",
+        responses={200: AboutStorySerializer}
+    )
+    def get(self, request):
+        """Get about story section content."""
+        about_story = AboutStory.get_solo()
+        serializer = AboutStorySerializer(about_story)
+        return success_response(
+            data=serializer.data,
+            message="About story section retrieved successfully."
+        )
+    
+    @extend_schema(
+        summary="Update about story section content",
+        description="Update about story section content. Journey is an array of objects with year, title, description, and image (URL). Admin only.",
+        request=AboutStoryUpdateSerializer,
+        responses={200: AboutStorySerializer}
+    )
+    def patch(self, request):
+        """Update about story section content."""
+        about_story = AboutStory.get_solo()
+        serializer = AboutStoryUpdateSerializer(about_story, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # Return updated data with display serializer
+        return success_response(
+            data=AboutStorySerializer(about_story).data,
+            message="About story section updated successfully."
+        )
+
+
+@extend_schema(tags=["cms-about"])
+class AboutCommunityView(APIView):
+    """Manage about page community section (singleton)."""
+    
+    parser_classes = [JSONParser]
+    
+    def get_permissions(self):
+        """Public can view, only admins can update."""
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+    
+    @extend_schema(
+        summary="Get about community section content",
+        description="Returns the about page community section content including title, description, features, team, and rules.",
+        responses={200: AboutCommunitySerializer}
+    )
+    def get(self, request):
+        """Get about community section content."""
+        about_community = AboutCommunity.get_solo()
+        serializer = AboutCommunitySerializer(about_community)
+        return success_response(
+            data=serializer.data,
+            message="About community section retrieved successfully."
+        )
+    
+    @extend_schema(
+        summary="Update about community section content",
+        description="Update about community section content. Features is an array of strings. Team is an array of objects with name, role, and image (URL). Rules is an array of objects with iconcode, title, and description. Admin only.",
+        request=AboutCommunityUpdateSerializer,
+        responses={200: AboutCommunitySerializer}
+    )
+    def patch(self, request):
+        """Update about community section content."""
+        about_community = AboutCommunity.get_solo()
+        serializer = AboutCommunityUpdateSerializer(about_community, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # Return updated data with display serializer
+        return success_response(
+            data=AboutCommunitySerializer(about_community).data,
+            message="About community section updated successfully."
+        )
+
+
+@extend_schema(tags=["cms-bookings"])
+class BookingsHeroSectionView(APIView):
+    """Manage bookings page hero section (singleton)."""
+    
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+    def get_permissions(self):
+        """Public can view, only admins can update."""
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+    
+    @extend_schema(
+        summary="Get bookings hero section content",
+        description="Returns the bookings page hero section content including title, description, image, and info array.",
+        responses={200: BookingsHeroSectionSerializer}
+    )
+    def get(self, request):
+        """Get bookings hero section content."""
+        bookings_hero = BookingsHeroSection.get_solo()
+        serializer = BookingsHeroSectionSerializer(bookings_hero)
+        return success_response(
+            data=serializer.data,
+            message="Bookings hero section retrieved successfully."
+        )
+    
+    @extend_schema(
+        summary="Update bookings hero section content",
+        description="Update bookings hero section content. Info is an array of objects with iconcode, title, and description. Admin only.",
+        request=BookingsHeroSectionUpdateSerializer,
+        responses={200: BookingsHeroSectionSerializer}
+    )
+    def patch(self, request):
+        """Update bookings hero section content."""
+        bookings_hero = BookingsHeroSection.get_solo()
+        serializer = BookingsHeroSectionUpdateSerializer(bookings_hero, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # Return updated data with display serializer
+        return success_response(
+            data=BookingsHeroSectionSerializer(bookings_hero).data,
+            message="Bookings hero section updated successfully."
         )
