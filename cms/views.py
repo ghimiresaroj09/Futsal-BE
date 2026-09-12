@@ -386,7 +386,7 @@ class TestimonialViewSet(EnvelopeMixin, viewsets.ModelViewSet):
 class ArenaSectionView(APIView):
     """Manage homepage arena section (singleton)."""
     
-    parser_classes = [JSONParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_permissions(self):
         """Public can view, only admins can update."""
@@ -416,10 +416,50 @@ class ArenaSectionView(APIView):
     )
     def patch(self, request):
         """Update arena section content."""
+        import json
+        from rest_framework.exceptions import ValidationError
+        
         arena = ArenaSection.get_solo()
-        serializer = ArenaSectionUpdateSerializer(arena, data=request.data, partial=True)
+        data = request.data.copy()
+        
+        # Extract and parse features before serializer validation
+        features_data = None
+        if 'features' in data:
+            features_raw = data['features']
+            
+            # Parse if it's a JSON string
+            if isinstance(features_raw, str):
+                try:
+                    features_data = json.loads(features_raw)
+                except (json.JSONDecodeError, ValueError):
+                    raise ValidationError({"features": ["Invalid JSON format for features."]})
+            else:
+                features_data = features_raw
+            
+            # Validate features structure
+            if features_data is not None:
+                if not isinstance(features_data, list):
+                    raise ValidationError({"features": ["Features must be an array."]})
+                
+                for idx, feature in enumerate(features_data):
+                    if not isinstance(feature, str):
+                        raise ValidationError({"features": [f"Feature at index {idx} must be a string."]})
+                    
+                    if not feature.strip():
+                        raise ValidationError({"features": [f"Feature at index {idx} cannot be empty."]})
+            
+            # Remove features from data before serializer validation
+            del data['features']
+        
+        # Validate and save other fields
+        serializer = ArenaSectionUpdateSerializer(arena, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
+        # Manually update features if provided
+        if features_data is not None:
+            arena.features = features_data
+            arena.save()
         
         # Return updated data with display serializer
         return success_response(
@@ -433,7 +473,7 @@ class ArenaSectionView(APIView):
 class WhyUsSectionView(APIView):
     """Manage homepage why us section (singleton)."""
     
-    parser_classes = [JSONParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_permissions(self):
         """Public can view, only admins can update."""
@@ -463,10 +503,55 @@ class WhyUsSectionView(APIView):
     )
     def patch(self, request):
         """Update why us section content."""
+        import json
+        from rest_framework.exceptions import ValidationError
+        
         why_us = WhyUsSection.get_solo()
-        serializer = WhyUsSectionUpdateSerializer(why_us, data=request.data, partial=True)
+        data = request.data.copy()
+        
+        # Extract and parse features before serializer validation
+        features_data = None
+        if 'features' in data:
+            features_raw = data['features']
+            
+            # Parse if it's a JSON string
+            if isinstance(features_raw, str):
+                try:
+                    features_data = json.loads(features_raw)
+                except (json.JSONDecodeError, ValueError):
+                    raise ValidationError({"features": ["Invalid JSON format for features."]})
+            else:
+                features_data = features_raw
+            
+            # Validate features structure
+            if features_data is not None:
+                if not isinstance(features_data, list):
+                    raise ValidationError({"features": ["Features must be an array."]})
+                
+                for idx, feature in enumerate(features_data):
+                    if not isinstance(feature, dict):
+                        raise ValidationError({"features": [f"Feature at index {idx} must be an object."]})
+                    
+                    required_fields = ['iconcode', 'title', 'description']
+                    for field in required_fields:
+                        if field not in feature:
+                            raise ValidationError({"features": [f"Feature at index {idx} is missing required field: {field}"]})
+                        
+                        if not str(feature[field]).strip():
+                            raise ValidationError({"features": [f"Feature at index {idx}: {field} cannot be empty."]})
+            
+            # Remove features from data before serializer validation
+            del data['features']
+        
+        # Validate and save other fields
+        serializer = WhyUsSectionUpdateSerializer(why_us, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
+        # Manually update features if provided
+        if features_data is not None:
+            why_us.features = features_data
+            why_us.save()
         
         # Return updated data with display serializer
         return success_response(
