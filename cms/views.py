@@ -844,6 +844,9 @@ class AboutStoryView(APIView):
         about_story = AboutStory.get_solo()
         data = request.data.copy()
         
+        # Get storage instance
+        storage = image_storage()
+        
         # Handle journey array with file uploads
         journey_data = []
         journey_index = 0
@@ -870,8 +873,8 @@ class AboutStoryView(APIView):
                 image_file = request.FILES[image_key]
                 # Upload to Cloudinary
                 upload_path = f"about/story/journey/{image_file.name}"
-                saved_path = image_storage.save(upload_path, image_file)
-                milestone['image'] = image_storage.url(saved_path)
+                saved_path = storage.save(upload_path, image_file)
+                milestone['image'] = storage.url(saved_path)
             elif image_key in data and isinstance(data[image_key], str):
                 # Use existing URL if provided as string
                 milestone['image'] = data[image_key]
@@ -939,6 +942,9 @@ class AboutCommunityView(APIView):
         about_community = AboutCommunity.get_solo()
         data = request.data.copy()
         
+        # Get storage instance
+        storage = image_storage()
+        
         # Handle features (already parsed as JSON array)
         if 'features' in data and isinstance(data['features'], str):
             try:
@@ -977,8 +983,8 @@ class AboutCommunityView(APIView):
                 image_file = request.FILES[image_key]
                 # Upload to Cloudinary
                 upload_path = f"about/community/team/{image_file.name}"
-                saved_path = image_storage.save(upload_path, image_file)
-                team_member['image'] = image_storage.url(saved_path)
+                saved_path = storage.save(upload_path, image_file)
+                team_member['image'] = storage.url(saved_path)
             elif image_key in data and isinstance(data[image_key], str):
                 # Use existing URL if provided as string
                 team_member['image'] = data[image_key]
