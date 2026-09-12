@@ -64,6 +64,8 @@ class HeroSectionSerializer(serializers.ModelSerializer):
 class HeroSectionUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating hero section."""
     
+    stats = serializers.JSONField(required=False, write_only=True)
+    
     class Meta:
         model = HeroSection
         fields = [
@@ -71,6 +73,7 @@ class HeroSectionUpdateSerializer(serializers.ModelSerializer):
             "title_two",
             "description",
             "image",
+            "stats",
             "stat_open_label",
             "stat_open_value",
             "stat_matches_label",
@@ -90,6 +93,47 @@ class HeroSectionUpdateSerializer(serializers.ModelSerializer):
         if not value or not value.strip():
             raise serializers.ValidationError("Title two cannot be empty.")
         return value.strip()
+    
+    def validate_stats(self, value):
+        """Validate stats array structure."""
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Stats must be an array.")
+        
+        if len(value) != 3:
+            raise serializers.ValidationError("Stats must contain exactly 3 items.")
+        
+        for idx, stat in enumerate(value):
+            if not isinstance(stat, dict):
+                raise serializers.ValidationError(f"Stat at index {idx} must be an object.")
+            
+            if 'label' not in stat or 'value' not in stat:
+                raise serializers.ValidationError(f"Stat at index {idx} must have 'label' and 'value' fields.")
+            
+            if not stat['label'].strip() or not stat['value'].strip():
+                raise serializers.ValidationError(f"Stat at index {idx}: 'label' and 'value' cannot be empty.")
+        
+        return value
+    
+    def update(self, instance, validated_data):
+        """Custom update to handle stats array mapping to individual fields."""
+        # Extract stats if provided
+        stats = validated_data.pop('stats', None)
+        
+        # Update simple fields
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        
+        # Map stats array to individual fields if provided
+        if stats:
+            instance.stat_open_label = stats[0]['label']
+            instance.stat_open_value = stats[0]['value']
+            instance.stat_matches_label = stats[1]['label']
+            instance.stat_matches_value = stats[1]['value']
+            instance.stat_courts_label = stats[2]['label']
+            instance.stat_courts_value = stats[2]['value']
+        
+        instance.save()
+        return instance
 
 
 class TestimonialSerializer(serializers.ModelSerializer):
