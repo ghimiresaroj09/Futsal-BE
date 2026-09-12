@@ -16,6 +16,7 @@ from cms.models import (
     GalleryCategory,
     GalleryImage,
     GalleryHighlight,
+    AboutHeroSection,
 )
 from cms.serializers import (
     HeroSectionSerializer,
@@ -34,6 +35,8 @@ from cms.serializers import (
     GalleryImageUploadSerializer,
     GalleryHighlightSerializer,
     GalleryHighlightUploadSerializer,
+    AboutHeroSectionSerializer,
+    AboutHeroSectionUpdateSerializer,
 )
 from common.mixins import EnvelopeMixin
 from common.permissions import IsAdmin
@@ -743,4 +746,50 @@ class GalleryHighlightViewSet(EnvelopeMixin, viewsets.ModelViewSet):
             data={"id": highlight_id, "title": highlight_title},
             message="Gallery highlight deleted successfully.",
             status=status.HTTP_200_OK
+        )
+
+
+@extend_schema(tags=["cms"])
+class AboutHeroSectionView(APIView):
+    """Manage about page hero section (singleton)."""
+    
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+    def get_permissions(self):
+        """Public can view, only admins can update."""
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+    
+    @extend_schema(
+        summary="Get about hero section content",
+        description="Returns the about page hero section content including title, description, image, and statistics.",
+        responses={200: AboutHeroSectionSerializer}
+    )
+    def get(self, request):
+        """Get about hero section content."""
+        about_hero = AboutHeroSection.get_solo()
+        serializer = AboutHeroSectionSerializer(about_hero)
+        return success_response(
+            data=serializer.data,
+            message="About hero section retrieved successfully."
+        )
+    
+    @extend_schema(
+        summary="Update about hero section content",
+        description="Update about hero section content. Only include fields you want to change. Admin only.",
+        request=AboutHeroSectionUpdateSerializer,
+        responses={200: AboutHeroSectionSerializer}
+    )
+    def patch(self, request):
+        """Update about hero section content."""
+        about_hero = AboutHeroSection.get_solo()
+        serializer = AboutHeroSectionUpdateSerializer(about_hero, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # Return updated data with display serializer
+        return success_response(
+            data=AboutHeroSectionSerializer(about_hero).data,
+            message="About hero section updated successfully."
         )

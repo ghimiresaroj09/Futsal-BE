@@ -12,6 +12,7 @@ from cms.models import (
     GalleryCategory,
     GalleryImage,
     GalleryHighlight,
+    AboutHeroSection,
 )
 
 
@@ -516,3 +517,76 @@ class GalleryHighlightUploadSerializer(serializers.ModelSerializer):
         if value < 0:
             raise serializers.ValidationError("Sort order cannot be negative.")
         return value
+
+
+class AboutHeroSectionSerializer(serializers.ModelSerializer):
+    """Serializer for about hero section display."""
+    
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = AboutHeroSection
+        fields = [
+            "title",
+            "description",
+            "image_url",
+            "years_in_game",
+            "matches_hosted",
+            "tournaments_run",
+            "players_in_community",
+            "updated_at",
+        ]
+        read_only_fields = ["updated_at"]
+    
+    def get_image_url(self, obj):
+        """Get the full URL for the hero image."""
+        if obj.image:
+            return obj.image.url
+        return None
+
+
+class AboutHeroSectionUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating about hero section."""
+    
+    class Meta:
+        model = AboutHeroSection
+        fields = [
+            "title",
+            "description",
+            "image",
+            "years_in_game",
+            "matches_hosted",
+            "tournaments_run",
+            "players_in_community",
+        ]
+    
+    def validate_title(self, value):
+        """Validate title is not empty."""
+        if value is not None and not value.strip():
+            raise serializers.ValidationError("Title cannot be empty.")
+        return value.strip() if value else value
+    
+    def validate_years_in_game(self, value):
+        """Validate years in game is not negative."""
+        if value < 0:
+            raise serializers.ValidationError("Years in game cannot be negative.")
+        return value
+    
+    def validate_matches_hosted(self, value):
+        """Validate matches hosted is not negative."""
+        if value < 0:
+            raise serializers.ValidationError("Matches hosted cannot be negative.")
+        return value
+    
+    def validate_tournaments_run(self, value):
+        """Validate tournaments run is not negative."""
+        if value < 0:
+            raise serializers.ValidationError("Tournaments run cannot be negative.")
+        return value
+    
+    def validate_players_in_community(self, value):
+        """Validate players in community is not negative."""
+        if value < 0:
+            raise serializers.ValidationError("Players in community cannot be negative.")
+        return value
+

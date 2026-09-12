@@ -11,6 +11,7 @@ from cms.models import (
     GalleryCategory,
     GalleryImage,
     GalleryHighlight,
+    AboutHeroSection,
 )
 
 
@@ -214,3 +215,26 @@ class GalleryHighlightAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ["created_at", "updated_at"]
+
+
+@admin.register(AboutHeroSection)
+class AboutHeroSectionAdmin(SingletonModelAdmin):
+    """Admin interface for about hero section."""
+    
+    fieldsets = (
+        ("Title & Description", {
+            "fields": ("title", "description")
+        }),
+        ("Image", {
+            "fields": ("image",)
+        }),
+        ("Statistics", {
+            "fields": ("years_in_game", "matches_hosted", "tournaments_run", "players_in_community")
+        }),
+        ("Metadata", {
+            "fields": ("updated_at",),
+            "classes": ("collapse",)
+        }),
+    )
+    
+    readonly_fields = ["updated_at"]

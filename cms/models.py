@@ -271,3 +271,32 @@ class Testimonial(BaseModel):
     
     def __str__(self):
         return f"{self.full_name} - {self.title}"
+
+
+class AboutHeroSection(SingletonModel):
+    """About page hero section content (singleton)."""
+    
+    title = models.CharField(max_length=200, help_text="About hero section title")
+    description = models.TextField(help_text="About hero description text")
+    image = models.ImageField(
+        upload_to="about/hero/",
+        storage=image_storage,
+        help_text="About hero background image",
+        null=True,
+        blank=True
+    )
+    
+    # Stats
+    years_in_game = models.IntegerField(default=0, help_text="Years in the game")
+    matches_hosted = models.IntegerField(default=0, help_text="Matches hosted")
+    tournaments_run = models.IntegerField(default=0, help_text="Tournaments run")
+    players_in_community = models.IntegerField(default=0, help_text="Players in the community")
+    
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "About Hero Section"
+        verbose_name_plural = "About Hero Section"
+    
+    def __str__(self):
+        return "About Page Hero Section"
