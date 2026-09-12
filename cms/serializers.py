@@ -64,7 +64,9 @@ class HeroSectionSerializer(serializers.ModelSerializer):
 class HeroSectionUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating hero section."""
     
-    stats = serializers.JSONField(required=False, write_only=True)
+    # Mark stats as optional to bypass DRF's JSONField validation
+    # We'll handle parsing and validation in the view
+    stats = serializers.JSONField(required=False, allow_null=True)
     
     class Meta:
         model = HeroSection
@@ -74,66 +76,22 @@ class HeroSectionUpdateSerializer(serializers.ModelSerializer):
             "description",
             "image",
             "stats",
-            "stat_open_label",
-            "stat_open_value",
-            "stat_matches_label",
-            "stat_matches_value",
-            "stat_courts_label",
-            "stat_courts_value",
         ]
+        extra_kwargs = {
+            'stats': {'required': False, 'allow_null': True},
+        }
     
     def validate_title_one(self, value):
         """Validate title_one is not empty."""
-        if not value or not value.strip():
+        if value is not None and not value.strip():
             raise serializers.ValidationError("Title one cannot be empty.")
-        return value.strip()
+        return value.strip() if value else value
     
     def validate_title_two(self, value):
         """Validate title_two is not empty."""
-        if not value or not value.strip():
+        if value is not None and not value.strip():
             raise serializers.ValidationError("Title two cannot be empty.")
-        return value.strip()
-    
-    def validate_stats(self, value):
-        """Validate stats array structure."""
-        if not isinstance(value, list):
-            raise serializers.ValidationError("Stats must be an array.")
-        
-        if len(value) != 3:
-            raise serializers.ValidationError("Stats must contain exactly 3 items.")
-        
-        for idx, stat in enumerate(value):
-            if not isinstance(stat, dict):
-                raise serializers.ValidationError(f"Stat at index {idx} must be an object.")
-            
-            if 'label' not in stat or 'value' not in stat:
-                raise serializers.ValidationError(f"Stat at index {idx} must have 'label' and 'value' fields.")
-            
-            if not stat['label'].strip() or not stat['value'].strip():
-                raise serializers.ValidationError(f"Stat at index {idx}: 'label' and 'value' cannot be empty.")
-        
-        return value
-    
-    def update(self, instance, validated_data):
-        """Custom update to handle stats array mapping to individual fields."""
-        # Extract stats if provided
-        stats = validated_data.pop('stats', None)
-        
-        # Update simple fields
-        for field, value in validated_data.items():
-            setattr(instance, field, value)
-        
-        # Map stats array to individual fields if provided
-        if stats:
-            instance.stat_open_label = stats[0]['label']
-            instance.stat_open_value = stats[0]['value']
-            instance.stat_matches_label = stats[1]['label']
-            instance.stat_matches_value = stats[1]['value']
-            instance.stat_courts_label = stats[2]['label']
-            instance.stat_courts_value = stats[2]['value']
-        
-        instance.save()
-        return instance
+        return value.strip() if value else value
 
 
 class TestimonialSerializer(serializers.ModelSerializer):
