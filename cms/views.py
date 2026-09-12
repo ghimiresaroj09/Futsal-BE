@@ -86,8 +86,19 @@ class HeroSectionView(APIView):
     )
     def patch(self, request):
         """Update hero section content."""
+        import json
+        
         hero = HeroSection.get_solo()
-        serializer = HeroSectionUpdateSerializer(hero, data=request.data, partial=True)
+        data = request.data.copy()
+        
+        # Parse stats if it's a JSON string
+        if 'stats' in data and isinstance(data['stats'], str):
+            try:
+                data['stats'] = json.loads(data['stats'])
+            except (json.JSONDecodeError, ValueError):
+                pass  # Let serializer validation handle it
+        
+        serializer = HeroSectionUpdateSerializer(hero, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
