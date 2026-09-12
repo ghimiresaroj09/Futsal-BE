@@ -19,6 +19,7 @@ from cms.models import (
     AboutHeroSection,
     AboutStory,
     AboutCommunity,
+    BookingsHeroSection,
 )
 from cms.serializers import (
     HeroSectionSerializer,
@@ -43,6 +44,8 @@ from cms.serializers import (
     AboutStoryUpdateSerializer,
     AboutCommunitySerializer,
     AboutCommunityUpdateSerializer,
+    BookingsHeroSectionSerializer,
+    BookingsHeroSectionUpdateSerializer,
 )
 from common.mixins import EnvelopeMixin
 from common.permissions import IsAdmin
@@ -890,4 +893,50 @@ class AboutCommunityView(APIView):
         return success_response(
             data=AboutCommunitySerializer(about_community).data,
             message="About community section updated successfully."
+        )
+
+
+@extend_schema(tags=["cms"])
+class BookingsHeroSectionView(APIView):
+    """Manage bookings page hero section (singleton)."""
+    
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+    def get_permissions(self):
+        """Public can view, only admins can update."""
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+    
+    @extend_schema(
+        summary="Get bookings hero section content",
+        description="Returns the bookings page hero section content including title, description, image, and info array.",
+        responses={200: BookingsHeroSectionSerializer}
+    )
+    def get(self, request):
+        """Get bookings hero section content."""
+        bookings_hero = BookingsHeroSection.get_solo()
+        serializer = BookingsHeroSectionSerializer(bookings_hero)
+        return success_response(
+            data=serializer.data,
+            message="Bookings hero section retrieved successfully."
+        )
+    
+    @extend_schema(
+        summary="Update bookings hero section content",
+        description="Update bookings hero section content. Info is an array of objects with iconcode, title, and description. Admin only.",
+        request=BookingsHeroSectionUpdateSerializer,
+        responses={200: BookingsHeroSectionSerializer}
+    )
+    def patch(self, request):
+        """Update bookings hero section content."""
+        bookings_hero = BookingsHeroSection.get_solo()
+        serializer = BookingsHeroSectionUpdateSerializer(bookings_hero, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # Return updated data with display serializer
+        return success_response(
+            data=BookingsHeroSectionSerializer(bookings_hero).data,
+            message="Bookings hero section updated successfully."
         )

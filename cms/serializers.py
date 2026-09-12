@@ -15,6 +15,7 @@ from cms.models import (
     AboutHeroSection,
     AboutStory,
     AboutCommunity,
+    BookingsHeroSection,
 )
 
 
@@ -799,6 +800,80 @@ class AboutCommunityUpdateSerializer(serializers.ModelSerializer):
                     if not rule[field].strip():
                         raise serializers.ValidationError(
                             f"Rule at index {idx}: '{field}' cannot be empty."
+                        )
+        
+        return value
+
+
+class BookingsHeroSectionSerializer(serializers.ModelSerializer):
+    """Serializer for bookings hero section display."""
+    
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = BookingsHeroSection
+        fields = [
+            "title",
+            "description",
+            "image_url",
+            "info",
+            "updated_at",
+        ]
+        read_only_fields = ["updated_at"]
+    
+    def get_image_url(self, obj):
+        """Get the full URL for the hero image."""
+        if obj.image:
+            return obj.image.url
+        return None
+
+
+class BookingsHeroSectionUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating bookings hero section."""
+    
+    class Meta:
+        model = BookingsHeroSection
+        fields = [
+            "title",
+            "description",
+            "image",
+            "info",
+        ]
+    
+    def validate_title(self, value):
+        """Validate title is not empty."""
+        if value is not None and not value.strip():
+            raise serializers.ValidationError("Title cannot be empty.")
+        return value.strip() if value else value
+    
+    def validate_info(self, value):
+        """Validate info is an array of objects with iconcode, title, and description."""
+        if value is not None:
+            if not isinstance(value, list):
+                raise serializers.ValidationError("Info must be an array.")
+            
+            for idx, item in enumerate(value):
+                if not isinstance(item, dict):
+                    raise serializers.ValidationError(
+                        f"Info item at index {idx} must be an object."
+                    )
+                
+                # Check required fields
+                required_fields = ["iconcode", "title", "description"]
+                for field in required_fields:
+                    if field not in item:
+                        raise serializers.ValidationError(
+                            f"Info item at index {idx} is missing required field: '{field}'."
+                        )
+                    
+                    if not isinstance(item[field], str):
+                        raise serializers.ValidationError(
+                            f"Info item at index {idx}: '{field}' must be a string."
+                        )
+                    
+                    if not item[field].strip():
+                        raise serializers.ValidationError(
+                            f"Info item at index {idx}: '{field}' cannot be empty."
                         )
         
         return value

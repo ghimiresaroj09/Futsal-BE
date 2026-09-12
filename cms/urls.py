@@ -14,6 +14,7 @@ from cms.views import (
     AboutHeroSectionView,
     AboutStoryView,
     AboutCommunityView,
+    BookingsHeroSectionView,
 )
 
 # Router for collections
@@ -36,6 +37,9 @@ urlpatterns = [
     
     # About Community section
     path("about/community/", AboutCommunityView.as_view(), name="about-community"),
+    
+    # Bookings Hero section
+    path("bookings/hero-section/", BookingsHeroSectionView.as_view(), name="bookings-hero-section"),
     
     # Arena section
     path("homepage/arena/", ArenaSectionView.as_view(), name="arena-section"),

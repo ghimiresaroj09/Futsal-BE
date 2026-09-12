@@ -350,3 +350,30 @@ class AboutCommunity(SingletonModel):
     
     def __str__(self):
         return "About Page Community Section"
+
+
+class BookingsHeroSection(SingletonModel):
+    """Bookings page hero section content (singleton)."""
+    
+    title = models.CharField(max_length=200, help_text="Bookings hero section title")
+    description = models.TextField(help_text="Bookings hero description text")
+    image = models.ImageField(
+        upload_to="bookings/hero/",
+        storage=image_storage,
+        help_text="Bookings hero background image",
+        null=True,
+        blank=True
+    )
+    info = models.JSONField(
+        default=list,
+        help_text="Array of info items with iconcode, title, and description",
+        blank=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Bookings Hero Section"
+        verbose_name_plural = "Bookings Hero Section"
+    
+    def __str__(self):
+        return "Bookings Page Hero Section"

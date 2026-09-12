@@ -14,6 +14,7 @@ from cms.models import (
     AboutHeroSection,
     AboutStory,
     AboutCommunity,
+    BookingsHeroSection,
 )
 
 
@@ -272,6 +273,29 @@ class AboutCommunityAdmin(SingletonModelAdmin):
         }),
         ("Rules", {
             "fields": ("rules",)
+        }),
+        ("Metadata", {
+            "fields": ("updated_at",),
+            "classes": ("collapse",)
+        }),
+    )
+    
+    readonly_fields = ["updated_at"]
+
+
+@admin.register(BookingsHeroSection)
+class BookingsHeroSectionAdmin(SingletonModelAdmin):
+    """Admin interface for bookings hero section."""
+    
+    fieldsets = (
+        ("Title & Description", {
+            "fields": ("title", "description")
+        }),
+        ("Image", {
+            "fields": ("image",)
+        }),
+        ("Info", {
+            "fields": ("info",)
         }),
         ("Metadata", {
             "fields": ("updated_at",),
