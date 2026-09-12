@@ -18,6 +18,7 @@ from cms.models import (
     GalleryHighlight,
     AboutHeroSection,
     AboutStory,
+    AboutCommunity,
 )
 from cms.serializers import (
     HeroSectionSerializer,
@@ -40,6 +41,8 @@ from cms.serializers import (
     AboutHeroSectionUpdateSerializer,
     AboutStorySerializer,
     AboutStoryUpdateSerializer,
+    AboutCommunitySerializer,
+    AboutCommunityUpdateSerializer,
 )
 from common.mixins import EnvelopeMixin
 from common.permissions import IsAdmin
@@ -841,4 +844,50 @@ class AboutStoryView(APIView):
         return success_response(
             data=AboutStorySerializer(about_story).data,
             message="About story section updated successfully."
+        )
+
+
+@extend_schema(tags=["cms"])
+class AboutCommunityView(APIView):
+    """Manage about page community section (singleton)."""
+    
+    parser_classes = [JSONParser]
+    
+    def get_permissions(self):
+        """Public can view, only admins can update."""
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+    
+    @extend_schema(
+        summary="Get about community section content",
+        description="Returns the about page community section content including title, description, features, team, and rules.",
+        responses={200: AboutCommunitySerializer}
+    )
+    def get(self, request):
+        """Get about community section content."""
+        about_community = AboutCommunity.get_solo()
+        serializer = AboutCommunitySerializer(about_community)
+        return success_response(
+            data=serializer.data,
+            message="About community section retrieved successfully."
+        )
+    
+    @extend_schema(
+        summary="Update about community section content",
+        description="Update about community section content. Features is an array of strings. Team is an array of objects with name, role, and image (URL). Rules is an array of objects with iconcode, title, and description. Admin only.",
+        request=AboutCommunityUpdateSerializer,
+        responses={200: AboutCommunitySerializer}
+    )
+    def patch(self, request):
+        """Update about community section content."""
+        about_community = AboutCommunity.get_solo()
+        serializer = AboutCommunityUpdateSerializer(about_community, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # Return updated data with display serializer
+        return success_response(
+            data=AboutCommunitySerializer(about_community).data,
+            message="About community section updated successfully."
         )

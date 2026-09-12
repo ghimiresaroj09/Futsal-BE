@@ -13,6 +13,7 @@ from cms.models import (
     GalleryHighlight,
     AboutHeroSection,
     AboutStory,
+    AboutCommunity,
 )
 
 
@@ -248,6 +249,29 @@ class AboutStoryAdmin(SingletonModelAdmin):
     fieldsets = (
         ("Content", {
             "fields": ("title", "description", "journey")
+        }),
+        ("Metadata", {
+            "fields": ("updated_at",),
+            "classes": ("collapse",)
+        }),
+    )
+    
+    readonly_fields = ["updated_at"]
+
+
+@admin.register(AboutCommunity)
+class AboutCommunityAdmin(SingletonModelAdmin):
+    """Admin interface for about community section."""
+    
+    fieldsets = (
+        ("Content", {
+            "fields": ("title", "description", "features")
+        }),
+        ("Team", {
+            "fields": ("team",)
+        }),
+        ("Rules", {
+            "fields": ("rules",)
         }),
         ("Metadata", {
             "fields": ("updated_at",),

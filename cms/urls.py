@@ -13,6 +13,7 @@ from cms.views import (
     GalleryHighlightViewSet,
     AboutHeroSectionView,
     AboutStoryView,
+    AboutCommunityView,
 )
 
 # Router for collections
@@ -32,6 +33,9 @@ urlpatterns = [
     
     # About Story section
     path("about/story/", AboutStoryView.as_view(), name="about-story"),
+    
+    # About Community section
+    path("about/community/", AboutCommunityView.as_view(), name="about-community"),
     
     # Arena section
     path("homepage/arena/", ArenaSectionView.as_view(), name="arena-section"),

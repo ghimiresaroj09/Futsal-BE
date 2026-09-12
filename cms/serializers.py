@@ -14,6 +14,7 @@ from cms.models import (
     GalleryHighlight,
     AboutHeroSection,
     AboutStory,
+    AboutCommunity,
 )
 
 
@@ -681,6 +682,124 @@ class AboutStoryUpdateSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         f"Journey item at index {idx}: 'image' cannot be empty."
                     )
+        
+        return value
+
+
+class AboutCommunitySerializer(serializers.ModelSerializer):
+    """Serializer for about community section display."""
+    
+    class Meta:
+        model = AboutCommunity
+        fields = [
+            "title",
+            "description",
+            "features",
+            "team",
+            "rules",
+            "updated_at",
+        ]
+        read_only_fields = ["updated_at"]
+
+
+class AboutCommunityUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating about community section."""
+    
+    class Meta:
+        model = AboutCommunity
+        fields = [
+            "title",
+            "description",
+            "features",
+            "team",
+            "rules",
+        ]
+    
+    def validate_title(self, value):
+        """Validate title is not empty."""
+        if value is not None and not value.strip():
+            raise serializers.ValidationError("Title cannot be empty.")
+        return value.strip() if value else value
+    
+    def validate_features(self, value):
+        """Validate features is an array of strings."""
+        if value is not None:
+            if not isinstance(value, list):
+                raise serializers.ValidationError("Features must be an array.")
+            
+            for idx, feature in enumerate(value):
+                if not isinstance(feature, str):
+                    raise serializers.ValidationError(
+                        f"Feature at index {idx} must be a string."
+                    )
+                if not feature.strip():
+                    raise serializers.ValidationError(
+                        f"Feature at index {idx} cannot be empty."
+                    )
+        
+        return value
+    
+    def validate_team(self, value):
+        """Validate team is an array of objects with name, role, and image."""
+        if value is not None:
+            if not isinstance(value, list):
+                raise serializers.ValidationError("Team must be an array.")
+            
+            for idx, member in enumerate(value):
+                if not isinstance(member, dict):
+                    raise serializers.ValidationError(
+                        f"Team member at index {idx} must be an object."
+                    )
+                
+                # Check required fields
+                required_fields = ["name", "role", "image"]
+                for field in required_fields:
+                    if field not in member:
+                        raise serializers.ValidationError(
+                            f"Team member at index {idx} is missing required field: '{field}'."
+                        )
+                    
+                    if not isinstance(member[field], str):
+                        raise serializers.ValidationError(
+                            f"Team member at index {idx}: '{field}' must be a string."
+                        )
+                    
+                    if not member[field].strip():
+                        raise serializers.ValidationError(
+                            f"Team member at index {idx}: '{field}' cannot be empty."
+                        )
+        
+        return value
+    
+    def validate_rules(self, value):
+        """Validate rules is an array of objects with iconcode, title, and description."""
+        if value is not None:
+            if not isinstance(value, list):
+                raise serializers.ValidationError("Rules must be an array.")
+            
+            for idx, rule in enumerate(value):
+                if not isinstance(rule, dict):
+                    raise serializers.ValidationError(
+                        f"Rule at index {idx} must be an object."
+                    )
+                
+                # Check required fields
+                required_fields = ["iconcode", "title", "description"]
+                for field in required_fields:
+                    if field not in rule:
+                        raise serializers.ValidationError(
+                            f"Rule at index {idx} is missing required field: '{field}'."
+                        )
+                    
+                    if not isinstance(rule[field], str):
+                        raise serializers.ValidationError(
+                            f"Rule at index {idx}: '{field}' must be a string."
+                        )
+                    
+                    if not rule[field].strip():
+                        raise serializers.ValidationError(
+                            f"Rule at index {idx}: '{field}' cannot be empty."
+                        )
         
         return value
 

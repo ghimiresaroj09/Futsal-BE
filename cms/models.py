@@ -320,3 +320,33 @@ class AboutStory(SingletonModel):
     
     def __str__(self):
         return "About Page Story Section"
+
+
+class AboutCommunity(SingletonModel):
+    """About page community section content (singleton)."""
+    
+    title = models.CharField(max_length=200, help_text="Community section title")
+    description = models.TextField(help_text="Community description text")
+    features = models.JSONField(
+        default=list,
+        help_text="Array of feature strings",
+        blank=True
+    )
+    team = models.JSONField(
+        default=list,
+        help_text="Array of team members with name, role, and image",
+        blank=True
+    )
+    rules = models.JSONField(
+        default=list,
+        help_text="Array of rules with iconcode, title, and description",
+        blank=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "About Community Section"
+        verbose_name_plural = "About Community Section"
+    
+    def __str__(self):
+        return "About Page Community Section"
