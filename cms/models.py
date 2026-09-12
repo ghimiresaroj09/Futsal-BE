@@ -286,11 +286,11 @@ class AboutHeroSection(SingletonModel):
         blank=True
     )
     
-    # Stats
-    years_in_game = models.IntegerField(default=0, help_text="Years in the game")
-    matches_hosted = models.IntegerField(default=0, help_text="Matches hosted")
-    tournaments_run = models.IntegerField(default=0, help_text="Tournaments run")
-    players_in_community = models.IntegerField(default=0, help_text="Players in the community")
+    # Stats - changed to CharField to accept any format
+    years_in_game = models.CharField(max_length=50, default="0", help_text="Years in the game")
+    matches_hosted = models.CharField(max_length=50, default="0", help_text="Matches hosted")
+    tournaments_run = models.CharField(max_length=50, default="0", help_text="Tournaments run")
+    players_in_community = models.CharField(max_length=50, default="0", help_text="Players in the community")
     
     updated_at = models.DateTimeField(auto_now=True)
     
