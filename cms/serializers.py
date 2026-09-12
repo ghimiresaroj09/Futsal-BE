@@ -597,15 +597,24 @@ class AboutHeroSectionUpdateSerializer(serializers.ModelSerializer):
 class AboutStorySerializer(serializers.ModelSerializer):
     """Serializer for about story section display."""
     
+    image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = AboutStory
         fields = [
             "title",
             "description",
+            "image_url",
             "journey",
             "updated_at",
         ]
         read_only_fields = ["updated_at"]
+    
+    def get_image_url(self, obj):
+        """Get the full URL for the story image."""
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 class AboutStoryUpdateSerializer(serializers.ModelSerializer):
@@ -616,6 +625,7 @@ class AboutStoryUpdateSerializer(serializers.ModelSerializer):
         fields = [
             "title",
             "description",
+            "image",
             "journey",
         ]
     
@@ -690,17 +700,26 @@ class AboutStoryUpdateSerializer(serializers.ModelSerializer):
 class AboutCommunitySerializer(serializers.ModelSerializer):
     """Serializer for about community section display."""
     
+    image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = AboutCommunity
         fields = [
             "title",
             "description",
+            "image_url",
             "features",
             "team",
             "rules",
             "updated_at",
         ]
         read_only_fields = ["updated_at"]
+    
+    def get_image_url(self, obj):
+        """Get the full URL for the community image."""
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 class AboutCommunityUpdateSerializer(serializers.ModelSerializer):
@@ -711,6 +730,7 @@ class AboutCommunityUpdateSerializer(serializers.ModelSerializer):
         fields = [
             "title",
             "description",
+            "image",
             "features",
             "team",
             "rules",

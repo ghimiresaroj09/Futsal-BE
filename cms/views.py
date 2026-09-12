@@ -808,7 +808,7 @@ class AboutHeroSectionView(APIView):
 class AboutStoryView(APIView):
     """Manage about page story section (singleton)."""
     
-    parser_classes = [JSONParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_permissions(self):
         """Public can view, only admins can update."""
@@ -854,7 +854,7 @@ class AboutStoryView(APIView):
 class AboutCommunityView(APIView):
     """Manage about page community section (singleton)."""
     
-    parser_classes = [JSONParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_permissions(self):
         """Public can view, only admins can update."""

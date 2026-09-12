@@ -249,7 +249,7 @@ class AboutStoryAdmin(SingletonModelAdmin):
     
     fieldsets = (
         ("Content", {
-            "fields": ("title", "description", "journey")
+            "fields": ("title", "description", "image", "journey")
         }),
         ("Metadata", {
             "fields": ("updated_at",),
@@ -266,7 +266,7 @@ class AboutCommunityAdmin(SingletonModelAdmin):
     
     fieldsets = (
         ("Content", {
-            "fields": ("title", "description", "features")
+            "fields": ("title", "description", "image", "features")
         }),
         ("Team", {
             "fields": ("team",)

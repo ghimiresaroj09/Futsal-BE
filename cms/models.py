@@ -307,6 +307,13 @@ class AboutStory(SingletonModel):
     
     title = models.CharField(max_length=200, help_text="Story section title")
     description = models.TextField(help_text="Story description text")
+    image = models.ImageField(
+        upload_to="about/story/",
+        storage=image_storage,
+        help_text="About story background image",
+        null=True,
+        blank=True
+    )
     journey = models.JSONField(
         default=list,
         help_text="Array of journey milestones with year, title, description, and image",
@@ -327,6 +334,13 @@ class AboutCommunity(SingletonModel):
     
     title = models.CharField(max_length=200, help_text="Community section title")
     description = models.TextField(help_text="Community description text")
+    image = models.ImageField(
+        upload_to="about/community/",
+        storage=image_storage,
+        help_text="About community background image",
+        null=True,
+        blank=True
+    )
     features = models.JSONField(
         default=list,
         help_text="Array of feature strings",
