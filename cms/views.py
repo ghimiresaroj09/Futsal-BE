@@ -850,6 +850,7 @@ class AboutStoryView(APIView):
         # Handle journey array with file uploads
         journey_data = []
         journey_index = 0
+        has_journey_data = False
         
         while True:
             # Check if journey[index] exists in the request
@@ -861,20 +862,24 @@ class AboutStoryView(APIView):
             if year_key not in data:
                 break
             
+            has_journey_data = True
             milestone = {
-                'year': data.get(year_key, ''),
-                'title': data.get(title_key, ''),
-                'description': data.get(description_key, ''),
+                'year': str(data.get(year_key, '')),
+                'title': str(data.get(title_key, '')),
+                'description': str(data.get(description_key, '')),
                 'image': ''
             }
             
             # Handle image upload for this milestone
             if image_key in request.FILES:
-                image_file = request.FILES[image_key]
-                # Upload to Cloudinary
-                upload_path = f"about/story/journey/{image_file.name}"
-                saved_path = storage.save(upload_path, image_file)
-                milestone['image'] = storage.url(saved_path)
+                try:
+                    image_file = request.FILES[image_key]
+                    # Upload to Cloudinary
+                    upload_path = f"about/story/journey/{image_file.name}"
+                    saved_path = storage.save(upload_path, image_file)
+                    milestone['image'] = storage.url(saved_path)
+                except Exception:
+                    milestone['image'] = ''
             elif image_key in data and isinstance(data[image_key], str):
                 # Use existing URL if provided as string
                 milestone['image'] = data[image_key]
@@ -882,18 +887,20 @@ class AboutStoryView(APIView):
             journey_data.append(milestone)
             journey_index += 1
         
-        # If we found journey data, use it
-        if journey_data:
-            data['journey'] = journey_data
-        
-        # Remove the individual journey[x][field] keys
-        keys_to_remove = [key for key in data.keys() if key.startswith('journey[')]
+        # Remove all journey-related keys from data
+        keys_to_remove = [key for key in list(data.keys()) if 'journey' in key.lower()]
         for key in keys_to_remove:
             del data[key]
         
+        # Use serializer only for title, description, image
         serializer = AboutStoryUpdateSerializer(about_story, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
+        # Manually update journey field
+        if has_journey_data:
+            about_story.journey = journey_data
+            about_story.save()
         
         # Return updated data with display serializer
         return success_response(
@@ -950,18 +957,16 @@ class AboutCommunityView(APIView):
             if isinstance(data['features'], str):
                 try:
                     data['features'] = json.loads(data['features'])
-                except json.JSONDecodeError:
-                    # If it's not valid JSON, treat as single item
-                    data['features'] = [data['features']]
+                except (json.JSONDecodeError, ValueError):
+                    data['features'] = []
         
         # Handle rules (already parsed as JSON array)
         if 'rules' in data:
             if isinstance(data['rules'], str):
                 try:
                     data['rules'] = json.loads(data['rules'])
-                except json.JSONDecodeError:
-                    # Remove invalid rules if can't parse
-                    del data['rules']
+                except (json.JSONDecodeError, ValueError):
+                    data['rules'] = []
         
         # Handle team array with file uploads
         team_data = []
@@ -998,22 +1003,57 @@ class AboutCommunityView(APIView):
             team_data.append(team_member)
             team_index += 1
         
+        # Extract and remove JSON fields from data before serializer
+        features_data = None
+        rules_data = None
+        team_data_final = None
+        
+        # Parse features
+        if 'features' in data:
+            if isinstance(data['features'], str):
+                try:
+                    features_data = json.loads(data['features'])
+                except (json.JSONDecodeError, ValueError):
+                    features_data = []
+            elif isinstance(data['features'], list):
+                features_data = data['features']
+            del data['features']
+        
+        # Parse rules
+        if 'rules' in data:
+            if isinstance(data['rules'], str):
+                try:
+                    rules_data = json.loads(data['rules'])
+                except (json.JSONDecodeError, ValueError):
+                    rules_data = []
+            elif isinstance(data['rules'], list):
+                rules_data = data['rules']
+            del data['rules']
+        
         # If we found team data, use it
         if has_team_data:
-            data['team'] = team_data
+            team_data_final = team_data
         
-        # Remove the individual team[x][field] keys and 'team' key if it exists as string
-        keys_to_remove = [key for key in data.keys() if key.startswith('team[') or key == 'team']
+        # Remove the individual team[x][field] keys and 'team' key if it exists
+        keys_to_remove = [key for key in list(data.keys()) if 'team' in key.lower()]
         for key in keys_to_remove:
             del data[key]
         
-        # Re-add team data after cleanup
-        if has_team_data:
-            data['team'] = team_data
-        
+        # Use serializer only for title, description, image
         serializer = AboutCommunityUpdateSerializer(about_community, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
+        # Manually update JSON fields
+        if features_data is not None:
+            about_community.features = features_data
+        if rules_data is not None:
+            about_community.rules = rules_data
+        if team_data_final is not None:
+            about_community.team = team_data_final
+        
+        # Save the model with JSON fields
+        about_community.save()
         
         # Return updated data with display serializer
         return success_response(
