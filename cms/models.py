@@ -391,3 +391,34 @@ class BookingsHeroSection(SingletonModel):
     
     def __str__(self):
         return "Bookings Page Hero Section"
+
+
+class FAQ(BaseModel):
+    """Frequently asked question shown on the website."""
+
+    question = models.CharField(max_length=500, help_text="Frequently asked question")
+    answer = models.TextField(help_text="Answer to the question")
+
+    class Meta:
+        db_table = "cms_faq"
+        ordering = ["created_at"]
+        verbose_name = "FAQ"
+        verbose_name_plural = "FAQs"
+
+    def __str__(self):
+        return self.question
+
+
+class TermsAndPrivacy(SingletonModel):
+    """Terms and privacy policy content (singleton)."""
+
+    terms = models.TextField(blank=True, default="", help_text="Terms and conditions content")
+    privacy = models.TextField(blank=True, default="", help_text="Privacy policy content")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Terms and Privacy"
+        verbose_name_plural = "Terms and Privacy"
+
+    def __str__(self):
+        return "Terms and Privacy"

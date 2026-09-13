@@ -15,12 +15,15 @@ from cms.views import (
     AboutStoryView,
     AboutCommunityView,
     BookingsHeroSectionView,
+    FAQViewSet,
+    TermsAndPrivacyView,
 )
 
 # Router for collections
 router = DefaultRouter()
 router.register(r'homepage/carousel', CarouselImageViewSet, basename='carousel')
 router.register(r'testimonials', TestimonialViewSet, basename='testimonial')
+router.register(r'faq', FAQViewSet, basename='faq')
 router.register(r'gallery/category', GalleryCategoryViewSet, basename='gallery-category')
 router.register(r'gallery/images', GalleryImageViewSet, basename='gallery-image')
 router.register(r'gallery/highlights', GalleryHighlightViewSet, basename='gallery-highlight')
@@ -40,6 +43,7 @@ urlpatterns = [
     
     # Bookings Hero section
     path("bookings/hero-section/", BookingsHeroSectionView.as_view(), name="bookings-hero-section"),
+    path("terms-and-privacy/", TermsAndPrivacyView.as_view(), name="terms-and-privacy"),
     
     # Arena section
     path("homepage/arena/", ArenaSectionView.as_view(), name="arena-section"),

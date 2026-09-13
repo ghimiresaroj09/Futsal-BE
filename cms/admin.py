@@ -15,6 +15,8 @@ from cms.models import (
     AboutStory,
     AboutCommunity,
     BookingsHeroSection,
+    FAQ,
+    TermsAndPrivacy,
 )
 
 
@@ -303,4 +305,20 @@ class BookingsHeroSectionAdmin(SingletonModelAdmin):
         }),
     )
     
+    readonly_fields = ["updated_at"]
+
+
+@admin.register(FAQ)
+class FAQAdmin(admin.ModelAdmin):
+    list_display = ["question", "created_at", "updated_at"]
+    search_fields = ["question", "answer"]
+    readonly_fields = ["created_at", "updated_at"]
+
+
+@admin.register(TermsAndPrivacy)
+class TermsAndPrivacyAdmin(SingletonModelAdmin):
+    fieldsets = (
+        ("Legal Content", {"fields": ("terms", "privacy")}),
+        ("Metadata", {"fields": ("updated_at",), "classes": ("collapse",)}),
+    )
     readonly_fields = ["updated_at"]
