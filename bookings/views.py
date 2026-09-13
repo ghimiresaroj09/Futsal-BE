@@ -126,7 +126,7 @@ class AdminBookingViewSet(EnvelopeMixin, viewsets.ModelViewSet):
     filterset_class = BookingFilter
     search_fields = ["booking_reference", "full_name", "email", "phone_number"]
     ordering_fields = ["created_at", "status", "slot__date", "slot__start_time", "amount"]
-    ordering = ["slot__date", "slot__start_time"]
+    ordering = ["-created_at"]
 
     def get_queryset(self):
         return bookings_queryset()
