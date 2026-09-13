@@ -16,6 +16,8 @@ from cms.models import (
     AboutStory,
     AboutCommunity,
     BookingsHeroSection,
+    FAQ,
+    TermsAndPrivacy,
 )
 
 
@@ -711,3 +713,30 @@ class BookingsHeroSectionUpdateSerializer(serializers.ModelSerializer):
         
         return value
 
+
+class FAQSerializer(serializers.ModelSerializer):
+    """Serializer for FAQ display and management."""
+
+    class Meta:
+        model = FAQ
+        fields = ["id", "question", "answer", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_question(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Question cannot be empty.")
+        return value.strip()
+
+    def validate_answer(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Answer cannot be empty.")
+        return value.strip()
+
+
+class TermsAndPrivacySerializer(serializers.ModelSerializer):
+    """Serializer for terms and privacy policy content."""
+
+    class Meta:
+        model = TermsAndPrivacy
+        fields = ["terms", "privacy", "updated_at"]
+        read_only_fields = ["updated_at"]

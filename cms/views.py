@@ -20,6 +20,8 @@ from cms.models import (
     AboutStory,
     AboutCommunity,
     BookingsHeroSection,
+    FAQ,
+    TermsAndPrivacy,
 )
 from cms.serializers import (
     HeroSectionSerializer,
@@ -46,6 +48,8 @@ from cms.serializers import (
     AboutCommunityUpdateSerializer,
     BookingsHeroSectionSerializer,
     BookingsHeroSectionUpdateSerializer,
+    FAQSerializer,
+    TermsAndPrivacySerializer,
 )
 from common.mixins import EnvelopeMixin
 from common.permissions import IsAdmin
@@ -1241,4 +1245,81 @@ class BookingsHeroSectionView(APIView):
         return success_response(
             data=BookingsHeroSectionSerializer(bookings_hero).data,
             message="Bookings hero section updated successfully."
+        )
+
+
+@extend_schema(tags=["cms-faq"])
+class FAQViewSet(EnvelopeMixin, viewsets.ModelViewSet):
+    """Manage frequently asked questions."""
+
+    queryset = FAQ.objects.all()
+    serializer_class = FAQSerializer
+    ordering = ["created_at"]
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+
+    @extend_schema(summary="List FAQs", responses={200: FAQSerializer(many=True)})
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(summary="Create an FAQ", request=FAQSerializer, responses={201: FAQSerializer})
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        faq = serializer.save()
+        return success_response(
+            data=FAQSerializer(faq).data,
+            message="FAQ created successfully.",
+            status=status.HTTP_201_CREATED,
+        )
+
+    @extend_schema(summary="Update an FAQ", request=FAQSerializer, responses={200: FAQSerializer})
+    def partial_update(self, request, *args, **kwargs):
+        faq = self.get_object()
+        serializer = self.get_serializer(faq, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        faq = serializer.save()
+        return success_response(data=FAQSerializer(faq).data, message="FAQ updated successfully.")
+
+    @extend_schema(summary="Delete an FAQ")
+    def destroy(self, request, *args, **kwargs):
+        faq = self.get_object()
+        faq_id = str(faq.id)
+        faq.delete()
+        return success_response(data={"id": faq_id}, message="FAQ deleted successfully.")
+
+
+@extend_schema(tags=["cms-legal"])
+class TermsAndPrivacyView(APIView):
+    """Read or update the site's terms and privacy policy."""
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsAdmin()]
+
+    @extend_schema(summary="Get terms and privacy content", responses={200: TermsAndPrivacySerializer})
+    def get(self, request):
+        content = TermsAndPrivacy.get_solo()
+        return success_response(
+            data=TermsAndPrivacySerializer(content).data,
+            message="Terms and privacy content retrieved successfully.",
+        )
+
+    @extend_schema(
+        summary="Update terms and privacy content",
+        request=TermsAndPrivacySerializer,
+        responses={200: TermsAndPrivacySerializer},
+    )
+    def patch(self, request):
+        content = TermsAndPrivacy.get_solo()
+        serializer = TermsAndPrivacySerializer(content, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return success_response(
+            data=TermsAndPrivacySerializer(content).data,
+            message="Terms and privacy content updated successfully.",
         )
